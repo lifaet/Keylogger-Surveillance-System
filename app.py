@@ -4,6 +4,15 @@ import win32event
 import win32api
 import winerror
 
+# #this hide function help to minimize the console
+# def hide():
+#     import win32console,win32gui
+#     window = win32console.GetConsoleWindow()
+#     win32gui.ShowWindow(window,0)
+#     return True
+
+# hide()
+
 #For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
@@ -13,17 +22,6 @@ def dir_path():
         os.makedirs(dir_path)
     os. chdir(dir_path)
     return dir_path
-
-# #disallowing multiple instance
-# def disable_multiple_instance():
-#     mutex = win32event.CreateMutex(None, 1, 'mutex_var_xboz')
-#     if win32api.GetLastError() == winerror.ERROR_ALREADY_EXISTS:
-#         mutex = None
-#         print ("Multiple Instance not Allowed")
-#         exit(0)
-#     x=''
-#     data=''
-#     count=0
 
 # check if internet is connected or not
 def is_connected():

