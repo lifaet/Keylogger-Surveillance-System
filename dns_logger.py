@@ -33,6 +33,7 @@ def active_interface():
 
 #dns logger
 def dns_logger():
+    print("DNS Quary Logger start and running..")
     # Set up the logging configuration
     logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', filemode='a', format='%(asctime)s %(message)s', datefmt='%Y-%m-%d %H:%M:%S', level=logging.INFO)
 

