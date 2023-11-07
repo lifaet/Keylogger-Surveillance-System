@@ -1,4 +1,3 @@
-""" CLASS TO SYNC LOCAL FOLDER AND FTP FOLDER """
 import os
 import platform
 import ftputil
