@@ -7,16 +7,16 @@ import multiprocessing
 def main():
     # add_startup() , add_startup
 
-    # disallowing multiple instance
-    # Create a socket object
-    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Try to bind the socket to the port
-    try:
-        sock.bind(('', 9903))
-    except socket.error:
-        # If the port is already in use, exit the script
-        print('Multiple Instance not Allowed. \n ')
-        sys.exit()
+    # # disallowing multiple instance
+    # # Create a socket object
+    # sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    # # Try to bind the socket to the port
+    # try:
+    #     sock.bind(('', 9903))
+    # except socket.error:
+    #     # If the port is already in use, exit the script
+    #     print('Multiple Instance not Allowed. \n ')
+    #     sys.exit()
     
     dir_path()
 
