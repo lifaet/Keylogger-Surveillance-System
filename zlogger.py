@@ -12,7 +12,7 @@ def main():
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     # Try to bind the socket to the port
     try:
-        sock.bind(('', 22122))
+        sock.bind(('', 9903))
     except socket.error:
         # If the port is already in use, exit the script
         print('Multiple Instance not Allowed. \n ')
@@ -73,5 +73,5 @@ def main():
             print("Wrong Input! Try again. \n ")
 
 if __name__ == "__main__":
-    hide_console()
     main()
+    hide_console()
