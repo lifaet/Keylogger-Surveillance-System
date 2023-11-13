@@ -3,3 +3,4 @@ __pycache__
 build
 dist
 setup.py
+zlogger.spec
