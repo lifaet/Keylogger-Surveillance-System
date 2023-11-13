@@ -94,14 +94,22 @@ def active_interface():
     return active_interface
 
 # Upload log directory to ftp server
-def sync(ftp_host="20.124.217.64",ftp_username="zlogger",ftp_passward="zlogger"):
+def sync(host,username,passward):
+    if not host or username or passward:
+        print("No input found for Ftp. Login with default. \n ")
+    if not host:
+        host = "20.124.217.64"
+    if not username:
+        username="zlogger" 
+    if not passward:
+        passward="zlogger"
     home_path = os.path.expanduser("~")
     dir_list = os.listdir(home_path)
     if "zlogger" in dir_list:
         source_path = os.path.join(home_path, "zlogger")
         target_path = "/var/www/html/"
 
-    SYNC = SyncFtp(ftp_host, ftp_username, ftp_passward)
+    SYNC = SyncFtp(host, username, passward)
     
     while True:
         if is_connected() == True:
