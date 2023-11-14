@@ -80,7 +80,5 @@ def main():
 if __name__ == "__main__":
     # On Windows calling this function is necessary.
     multiprocessing.freeze_support()
-    sys.tracebacklimit = 0
     main()
-    sys.tracebacklimit = 0
     # hide_console() ++import hide_console from utilities

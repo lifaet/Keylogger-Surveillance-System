@@ -114,7 +114,10 @@ def sync(host,username,passward):
     while True:
         if is_connected() == True:
             print("Internet is available. Syncing to the ftp.. \n ")
-            SYNC.send_to_ftp(source_path, target_path)
+            try:
+                SYNC.send_to_ftp(source_path, target_path)
+            except KeyboardInterrupt:
+                exit(0)
         else:
             print("No internet! Checking for internet connectivity.. \n ")
         time.sleep(60)
@@ -148,4 +151,7 @@ def server():
     DIRECTORY = "./"
     with socketserver.TCPServer(("", PORT), AuthHandler) as httpd:
         print("Local server running at http://localhost:8000 default username and passward is: 'zlogger' \n ")
-        httpd.serve_forever()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            exit(0)

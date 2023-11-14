@@ -106,7 +106,10 @@ def sync():
     SYNC = SyncFtp("20.124.217.64", "zlogger", "zlogger")
     while True:
         if is_connected() == True:
-            SYNC.send_to_ftp(source_path, target_path)
+            try:
+                SYNC.send_to_ftp(source_path, target_path)
+            except KeyboardInterrupt:
+                exit(0)
         time.sleep(60)
 
 #Creating local server
@@ -137,4 +140,7 @@ def server():
     PORT = 8000
     DIRECTORY = "./"
     with socketserver.TCPServer(("", PORT), AuthHandler) as httpd:
-        httpd.serve_forever()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            exit(0)

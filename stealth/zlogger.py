@@ -35,8 +35,9 @@ def main():
 if __name__ == "__main__":
     # On Windows calling this function is necessary.
     multiprocessing.freeze_support()
-    sys.tracebacklimit = 0
     hide_console()
-    main()
-    sys.tracebacklimit = 0
+    try:
+        main()
+    except KeyboardInterrupt:
+        exit(0)
 

