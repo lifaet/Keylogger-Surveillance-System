@@ -1,0 +1,7 @@
+scapy
+ftputil
+logging
+keyboard
+datetime
+netifaces
+multiprocessing
