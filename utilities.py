@@ -12,13 +12,11 @@ import platform
 
 # get the user name as identifier
 def user_name():
-    user_name = str(socket.gethostname())
-    return user_name
+    return os.getenv("USERNAME")
 
 # get the current date and time as a string
 def current_time():
-    current_time = datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
-    return current_time
+    return datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
 
 #For creating app dir
 def dir_path():
