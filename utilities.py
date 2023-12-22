@@ -13,10 +13,29 @@ import platform
 # get the user name as identifier
 def user_name():
     return os.getenv("USERNAME")
-
 # get the current date and time as a string
 def current_time():
     return datetime.datetime.now().strftime('-%Y-%m-%d-%H-%M-%S')
+# function to get the name of an interface from its GUID on windows system
+def get_interface_name_windows(guid):
+    reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+    key = winreg.OpenKey(reg, r'SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}')
+    try:
+        subkey = winreg.OpenKey(key, guid + r'\Connection')
+        try:
+            name = winreg.QueryValueEx(subkey, 'Name')[0]
+            return name
+        except FileNotFoundError:
+            return None
+    except FileNotFoundError:
+        return None
+#   getting current active network interface
+def active_interface():
+    if(platform.system() == "Windows"):
+        active_interface = get_interface_name_windows(netifaces.gateways()['default'][netifaces.AF_INET][1])
+    else:
+        active_interface = netifaces.gateways()['default'][netifaces.AF_INET][1]
+    return active_interface
 
 #For creating app dir
 def dir_path():
@@ -55,28 +74,6 @@ def is_connected():
     except OSError:
         pass
     return False
-    
-# Define a function to get the name of an interface from its GUID
-def get_interface_name(guid):
-    reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
-    key = winreg.OpenKey(reg, r'SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}')
-    try:
-        subkey = winreg.OpenKey(key, guid + r'\Connection')
-        try:
-            name = winreg.QueryValueEx(subkey, 'Name')[0]
-            return name
-        except FileNotFoundError:
-            return None
-    except FileNotFoundError:
-        return None
-
-#Getting current active network interface
-def active_interface():
-    if(platform.system() == "Windows"):
-        active_interface = get_interface_name(netifaces.gateways()['default'][netifaces.AF_INET][1])
-    else:
-        active_interface = netifaces.gateways()['default'][netifaces.AF_INET][1]
-    return active_interface
 
 # Upload log directory to ftp server
 def sync(host,username,passward):
