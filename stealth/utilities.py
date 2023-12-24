@@ -4,9 +4,6 @@ import datetime
 import netifaces
 import winreg
 import time
-import win32console
-import win32gui
-import win32con
 from sync_ftp import SyncFtp
 import http.server
 import base64
@@ -35,6 +32,9 @@ def dir_path():
 
 # #this hide function help to minimize the console
 def hide_console():
+    import win32console
+    import win32gui
+    import win32con
     window = win32console.GetConsoleWindow()
     win32gui.ShowWindow(window,win32con.SW_HIDE)
     return True
