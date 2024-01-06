@@ -23,29 +23,44 @@ def key_logger():
 
 #dns logger
 def dns_logger():
-    logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', level=logging.INFO, filemode='a', 
-                        format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    # Set up the logging configuration
+    logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     # Define a function to process each packet
     def process_packet(packet):
-        # Check if the packet has a DNS resource record layer
-        if packet.haslayer(scapy.DNSRR):
-            # Get the record name and data from the packet
-            rrname = packet[scapy.DNSRR].rrname.decode('utf-8')
-            rdata = packet[scapy.DNSRR].rdata
-            rtype = packet[scapy.DNSRR].type
-            # Decode the record data from bytes to a string if necessary
-            if isinstance(rdata, bytes):
-                rdata = rdata.decode('utf-8')
-            # Log the record based on its type
-            if rtype == 1:
-                logging.info(f'A record: {rrname} -> {rdata}')
-            elif rtype == 28:
-                logging.info(f'AAAA record: {rrname} -> {rdata}')
-            elif rtype == 5:
-                logging.info(f'CNAME record: {rrname} -> {rdata}')
-            elif rtype == 15:
-                logging.info(f'MX record: {rrname} -> {rdata}')
-            elif rtype == 2:
-                logging.info(f'NS record: {rrname} -> {rdata}')
-    # Start sniffing packets on the active network interface
-    scapy.sniff(iface=active_interface(), prn=process_packet, store=False)
+        # Check if the packet has a DNS layer and a DNS response
+        if packet.haslayer(scapy.DNS) and packet[scapy.DNS].qr == 1:
+            # Check if the packet has any answers in the DNS response
+            if packet[scapy.DNS].an is not None:
+                # Loop through each answer in the DNS response
+                for answer in packet[scapy.DNS].an:
+                    # Check if the answer is an A record
+                    if answer.type == 1:
+                        # Get the domain name and the IP address from the answer
+                        domain = answer.rrname.decode('utf-8')
+                        ip = answer.rdata
+                        # Log the domain name and the IP address
+                        logging.info(f'A record: {domain} -> {ip}')
+                    # Check if the answer is an AAAA record
+                    elif answer.type == 28:
+                        domain = answer.rrname.decode('utf-8')
+                        ip = answer.rdata
+                        logging.info(f'AAAA record: {domain} -> {ip}')
+                    # Check if the answer is an CNAME record
+                    elif answer.type == 5:
+                        cname = answer.rdata.decode('utf-8')
+                        logging.info(f'CNAME record: {domain} -> {cname}')
+                    # Check if the answer is an MX record    
+                    elif answer.type == 15:
+                        exchange = answer.exchange.decode('utf-8')
+                        preference = answer.preference
+                        logging.info(f'MX record: {domain} -> {exchange} with preference {preference}')
+                    # Check if the answer is an NS record
+                    elif answer.type == 2:
+                        ns = answer.rdata.decode('utf-8')
+                        logging.info(f'NS record: {domain} -> {ns}')
+
+    # Sniff packets on the network interface and pass them to the process_packet function
+    try:
+        scapy.sniff(iface=active_interface(), store=False, prn=process_packet)
+    except KeyboardInterrupt:
+        exit(0)
