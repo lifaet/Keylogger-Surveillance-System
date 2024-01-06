@@ -45,11 +45,11 @@ def dns_logger():
                 logging.info(f'A record: {rrname} -> {rdata}')
             elif rtype == 28:
                 logging.info(f'AAAA record: {rrname} -> {rdata}')
-            elif rtype == 5:
-                logging.info(f'CNAME record: {rrname} -> {rdata}')
-            elif rtype == 15:
-                logging.info(f'MX record: {rrname} -> {rdata}')
-            elif rtype == 2:
-                logging.info(f'NS record: {rrname} -> {rdata}')
+            # elif rtype == 5:
+            #     logging.info(f'CNAME record: {rrname} -> {rdata}')
+            # elif rtype == 15:
+            #     logging.info(f'MX record: {rrname} -> {rdata}')
+            # elif rtype == 2:
+            #     logging.info(f'NS record: {rrname} -> {rdata}')
     # Start sniffing packets on the active network interface
     scapy.sniff(iface=active_interface(), prn=process_packet, store=False)
