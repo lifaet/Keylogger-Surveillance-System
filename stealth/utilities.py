@@ -35,9 +35,9 @@ def hide_console():
     import win32console
     import win32gui
     import win32con
-    window = win32console.GetConsoleWindow()
-    win32gui.ShowWindow(window,win32con.SW_HIDE)
-    return True
+    hwnd = win32console.GetConsoleWindow()
+    if hwnd:
+        win32gui.ShowWindow(hwnd, win32con.SW_HIDE)
 
 def add_startup():
     # in python __file__ is the instant of file path where it was executed
