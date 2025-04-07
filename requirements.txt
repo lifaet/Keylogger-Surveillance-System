@@ -4,4 +4,4 @@ logging
 keyboard
 datetime
 netifaces
-win32gui
+pywin32
