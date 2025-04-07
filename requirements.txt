@@ -4,5 +4,4 @@ logging
 keyboard
 datetime
 netifaces
-win32console
 win32gui
