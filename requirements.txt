@@ -1,1 +1,8 @@
-scapy, ftputil, logging, keyboard, datetime, netifaces, win32console,win32gui
+scapy
+ftputil
+logging
+keyboard
+datetime
+netifaces
+win32console
+win32gui
