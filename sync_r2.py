@@ -8,6 +8,7 @@ import boto3
 from botocore.client import Config
 from botocore.exceptions import ClientError, NoCredentialsError, PartialCredentialsError
 from dotenv import load_dotenv
+from log_utils import log_console
 
 class R2FolderSync:
     def __init__(self, local_folder=None, sync_interval=5):
@@ -46,15 +47,11 @@ class R2FolderSync:
                 config=Config(signature_version='s3v4'),
                 region_name='auto'
             )
-            print("R2 client initialized.")
+            log_console("R2 client initialized.", "SUCCESS")
             return client
-        except (NoCredentialsError, PartialCredentialsError) as e:
-            raise RuntimeError(f"Missing or incomplete R2 credentials: {e}")
-        except ClientError as e:
-            error_code = e.response.get("Error", {}).get("Code")
-            raise RuntimeError(f"ClientError during R2 client setup: {error_code}")
         except Exception as e:
-            raise RuntimeError(f"Unexpected error during R2 client setup: {e}")
+            log_console(f"Unexpected error during R2 client setup: {e}", "ERROR")
+            raise
 
     def check_internet_connection(self, host="www.google.com", port=80, timeout=3):
         """
