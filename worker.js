@@ -127,7 +127,7 @@ export default {
     <title>KSS File Browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #f5f7fa; color: #222; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #181a1b; color: #e0e0e0; }
         .slide-up { 
             opacity: 0; 
             transform: translateY(40px); 
@@ -149,17 +149,35 @@ export default {
             margin-bottom: 0.2em; 
             font-weight: 700; 
             letter-spacing: -1px;
-            color: #1976d2;
+            color: #90caf9;
             text-align: center;
         }
         .breadcrumb-nav { margin-bottom: 1em; }
-        .breadcrumb-nav a { color: #1976d2; text-decoration: none; margin-right: 0.2em; }
+        .breadcrumb-nav a { color: #90caf9; text-decoration: none; margin-right: 0.2em; }
         .breadcrumb-nav a:hover { text-decoration: underline; }
-        .message { margin: 1em 0; color: #b58900; }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 1em;
+            background: #23272a;
+            color: #90caf9;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4em 1.2em;
+            font-size: 1em;
+            font-weight: 500;
+            cursor: pointer;
+            box-shadow: 0 1px 4px #0005;
+            transition: background 0.18s, color 0.18s;
+        }
+        .back-btn:hover {
+            background: #90caf9;
+            color: #181a1b;
+        }
+        .message { margin: 1em 0; color: #ffe082; }
         .table-container {
-            background: #fff;
+            background: #23272a;
             border-radius: 12px;
-            box-shadow: 0 2px 16px #0001;
+            box-shadow: 0 2px 16px #0008;
             overflow-x: auto;
             padding: 0.5em 0.5em 0.5em 0.5em;
         }
@@ -174,21 +192,21 @@ export default {
             text-align: left;
         }
         th {
-            background: #f5f7fa;
-            color: #1976d2;
+            background: #23272a;
+            color: #90caf9;
             font-weight: 600;
             font-size: 1.01rem;
-            border-bottom: 2px solid #e3e8ee;
+            border-bottom: 2px solid #424242;
         }
         tr {
             transition: background 0.15s;
         }
         tr:hover {
-            background: #f0f4fa;
+            background: #22262a;
         }
         td {
             font-size: 1.01rem;
-            border-bottom: 1px solid #e3e8ee;
+            border-bottom: 1px solid #292b2f;
         }
         tr:last-child td {
             border-bottom: none;
@@ -205,25 +223,25 @@ export default {
             border-radius: 6px;
             padding: 0.38em 1.1em;
             cursor: pointer;
-            background: #e3e8ee;
-            color: #1976d2;
+            background: #31363b;
+            color: #90caf9;
             font-weight: 500;
-            box-shadow: 0 1px 2px #0001;
+            box-shadow: 0 1px 2px #0003;
             position: relative;
             overflow: hidden;
             transition: background 0.18s, color 0.18s;
         }
         .btn:hover, button:hover {
-            background: #1976d2;
-            color: #fff;
+            background: #90caf9;
+            color: #181a1b;
         }
         .danger {
-            background: #ffeaea;
-            color: #d32f2f;
+            background: #3a2323;
+            color: #ef5350;
         }
         .danger:hover {
-            background: #d32f2f;
-            color: #fff;
+            background: #ef5350;
+            color: #181a1b;
         }
         /* Ripple effect */
         .btn:after, button:after {
@@ -234,7 +252,7 @@ export default {
             width: 100px; height: 100px;
             left: 50%; top: 50%;
             pointer-events: none;
-            background: rgba(25, 118, 210, 0.15);
+            background: rgba(144, 202, 249, 0.15);
             transform: translate(-50%, -50%) scale(0);
             transition: transform 0.3s, opacity 0.8s;
             opacity: 0;
@@ -245,11 +263,11 @@ export default {
             transition: 0s;
         }
         #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
-        #text-viewer-modal .modal-content { background: #fff; color: #222; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
+        #text-viewer-modal .modal-content { background: #23272a; color: #e0e0e0; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #000a;}
         #text-viewer-modal .modal-header { display: flex; justify-content: space-between; align-items: center; }
         #text-viewer-modal .modal-close-button { background: none; border: none; font-size: 1.3em; cursor: pointer; color: #888; }
-        #text-viewer-modal .modal-close-button:hover { color: #d32f2f; }
-        pre { background: #f5f7fa; padding: 0.7em; border-radius: 6px; overflow-x: auto; }
+        #text-viewer-modal .modal-close-button:hover { color: #ef5350; }
+        pre { background: #181a1b; padding: 0.7em; border-radius: 6px; overflow-x: auto; color: #e0e0e0; }
         @media (max-width: 600px) {
             .table-container { padding: 0.2em; }
             th, td { padding: 0.5em 0.4em; }
@@ -261,6 +279,7 @@ export default {
     <div class="slide-up">
         <h1 class="slide-heading">KSS File Browser</h1>
         <nav id="breadcrumb-nav" class="breadcrumb-nav"></nav>
+        <button id="back-btn" class="back-btn" style="display:none;">&#8592; Back</button>
         <div id="messages" class="message"></div>
         <div class="table-container">
             <table>
@@ -295,6 +314,7 @@ export default {
         const modalFileName = document.getElementById('modal-file-name');
         const modalTextContent = document.getElementById('modal-text-content');
         const modalCloseButton = document.getElementById('modal-close-button');
+        const backBtn = document.getElementById('back-btn');
 
         const formatBytes = (bytes, decimals = 2) => {
             if (bytes === 0) return '0 Bytes';
@@ -307,7 +327,7 @@ export default {
         const displayMessage = (msg, type = 'info') => {
             messagesDiv.textContent = msg;
             messagesDiv.style.display = '';
-            messagesDiv.style.color = type === 'error' ? '#d32f2f' : '#b58900';
+            messagesDiv.style.color = type === 'error' ? '#ef5350' : '#ffe082';
         };
         const hideMessage = () => { messagesDiv.textContent = ''; messagesDiv.style.display = 'none'; };
 
@@ -370,24 +390,23 @@ export default {
             });
         };
 
+        const updateBackButton = () => {
+            if (!currentPrefix || currentPrefix === '') {
+                backBtn.style.display = 'none';
+            } else {
+                backBtn.style.display = '';
+            }
+        };
+
         const fetchFiles = async () => {
             displayMessage('Loading files...');
             renderBreadcrumbs();
+            updateBackButton();
             try {
                 const response = await fetch(\`/list?prefix=\${encodeURIComponent(currentPrefix)}\`);
                 if (!response.ok) throw new Error(\`HTTP error! status: \${response.status}\`);
                 const data = await response.json();
                 fileListBody.innerHTML = '';
-                // ".." up folder
-                if (currentPrefix !== '') {
-                    const parentPrefix = currentPrefix.split('/').slice(0, -2).join('/') + (currentPrefix.split('/').length > 2 ? '/' : '');
-                    const row = document.createElement('tr');
-                    row.innerHTML = \`
-                        <td><a href="#" class="item-link" data-prefix="\${parentPrefix}">..</a></td>
-                        <td>Folder</td><td></td><td></td><td></td>
-                    \`;
-                    fileListBody.appendChild(row);
-                }
                 // Folders
                 data.folders.forEach(folderPrefix => {
                     const folderName = folderPrefix.replace(currentPrefix, '').replace('/', '');
@@ -396,7 +415,7 @@ export default {
                         <td><a href="#" class="item-link" data-prefix="\${folderPrefix}">\${folderName}</a></td>
                         <td>Folder</td><td></td><td></td>
                         <td class="actions">
-                            <button class="danger" data-key="\${folderPrefix}" data-type="folder">Delete</button>
+                            <button class="btn danger" data-key="\${folderPrefix}" data-type="folder">Delete</button>
                         </td>
                     \`;
                     fileListBody.appendChild(row);
@@ -437,6 +456,16 @@ export default {
                 hideMessage();
             } catch (e) {
                 displayMessage('Failed to load files. ' + e.message, 'error');
+            }
+        };
+
+        backBtn.onclick = () => {
+            if (!currentPrefix) return;
+            const parts = currentPrefix.split('/').filter(Boolean);
+            if (parts.length > 0) {
+                parts.pop();
+                currentPrefix = parts.length > 0 ? parts.join('/') + '/' : '';
+                fetchFiles();
             }
         };
 
