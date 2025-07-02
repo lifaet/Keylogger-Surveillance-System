@@ -127,7 +127,7 @@ export default {
     <title>KSS File Browser</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: Arial, sans-serif; margin: 2em; background: #fff; color: #222; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #f5f7fa; color: #222; }
         .slide-up { 
             opacity: 0; 
             transform: translateY(40px); 
@@ -147,30 +147,114 @@ export default {
         h1 { 
             font-size: 2.1em; 
             margin-bottom: 0.2em; 
-            font-weight: bold; 
+            font-weight: 700; 
             letter-spacing: -1px;
-            color: #0074d9;
+            color: #1976d2;
             text-align: center;
         }
         .breadcrumb-nav { margin-bottom: 1em; }
-        .breadcrumb-nav a { color: #0074d9; text-decoration: none; margin-right: 0.2em; }
+        .breadcrumb-nav a { color: #1976d2; text-decoration: none; margin-right: 0.2em; }
         .breadcrumb-nav a:hover { text-decoration: underline; }
         .message { margin: 1em 0; color: #b58900; }
-        table { width: 100%; border-collapse: collapse; margin-bottom: 1em; }
-        th, td { border: 1px solid #ccc; padding: 0.5em; text-align: left; }
-        th { background: #f4f4f4; }
-        tr:hover { background: #f9f9f9; }
-        .actions { display: flex; gap: 0.3em; }
-        button, a.btn { padding: 0.2em 0.7em; border: 1px solid #bbb; background: #f4f4f4; color: #222; cursor: pointer; border-radius: 3px; text-decoration: none; }
-        button:hover, a.btn:hover { background: #e2e2e2; }
-        .danger { color: #c00; border-color: #c00; background: #fff0f0; }
-        .danger:hover { background: #ffeaea; }
+        .table-container {
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 16px #0001;
+            overflow-x: auto;
+            padding: 0.5em 0.5em 0.5em 0.5em;
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: transparent;
+        }
+        th, td {
+            padding: 0.85em 1em;
+            text-align: left;
+        }
+        th {
+            background: #f5f7fa;
+            color: #1976d2;
+            font-weight: 600;
+            font-size: 1.01rem;
+            border-bottom: 2px solid #e3e8ee;
+        }
+        tr {
+            transition: background 0.15s;
+        }
+        tr:hover {
+            background: #f0f4fa;
+        }
+        td {
+            font-size: 1.01rem;
+            border-bottom: 1px solid #e3e8ee;
+        }
+        tr:last-child td {
+            border-bottom: none;
+        }
+        .actions {
+            display: flex;
+            gap: 0.5em;
+        }
+        .btn, button {
+            font-family: inherit;
+            font-size: 1em;
+            border: none;
+            outline: none;
+            border-radius: 6px;
+            padding: 0.38em 1.1em;
+            cursor: pointer;
+            background: #e3e8ee;
+            color: #1976d2;
+            font-weight: 500;
+            box-shadow: 0 1px 2px #0001;
+            position: relative;
+            overflow: hidden;
+            transition: background 0.18s, color 0.18s;
+        }
+        .btn:hover, button:hover {
+            background: #1976d2;
+            color: #fff;
+        }
+        .danger {
+            background: #ffeaea;
+            color: #d32f2f;
+        }
+        .danger:hover {
+            background: #d32f2f;
+            color: #fff;
+        }
+        /* Ripple effect */
+        .btn:after, button:after {
+            content: "";
+            display: block;
+            position: absolute;
+            border-radius: 50%;
+            width: 100px; height: 100px;
+            left: 50%; top: 50%;
+            pointer-events: none;
+            background: rgba(25, 118, 210, 0.15);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.3s, opacity 0.8s;
+            opacity: 0;
+        }
+        .btn:active:after, button:active:after {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            transition: 0s;
+        }
         #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
-        #text-viewer-modal .modal-content { background: #fff; color: #222; padding: 1em; border-radius: 6px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; }
+        #text-viewer-modal .modal-content { background: #fff; color: #222; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
         #text-viewer-modal .modal-header { display: flex; justify-content: space-between; align-items: center; }
         #text-viewer-modal .modal-close-button { background: none; border: none; font-size: 1.3em; cursor: pointer; color: #888; }
-        #text-viewer-modal .modal-close-button:hover { color: #c00; }
-        pre { background: #f4f4f4; padding: 0.7em; border-radius: 4px; overflow-x: auto; }
+        #text-viewer-modal .modal-close-button:hover { color: #d32f2f; }
+        pre { background: #f5f7fa; padding: 0.7em; border-radius: 6px; overflow-x: auto; }
+        @media (max-width: 600px) {
+            .table-container { padding: 0.2em; }
+            th, td { padding: 0.5em 0.4em; }
+            #text-viewer-modal .modal-content { padding: 0.7em; }
+        }
     </style>
 </head>
 <body>
@@ -178,18 +262,20 @@ export default {
         <h1 class="slide-heading">KSS File Browser</h1>
         <nav id="breadcrumb-nav" class="breadcrumb-nav"></nav>
         <div id="messages" class="message"></div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Type</th>
-                    <th>Size</th>
-                    <th>Last Modified</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="file-list-body"></tbody>
-        </table>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Type</th>
+                        <th>Size</th>
+                        <th>Last Modified</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="file-list-body"></tbody>
+            </table>
+        </div>
     </div>
     <div id="text-viewer-modal">
         <div class="modal-content">
@@ -221,7 +307,7 @@ export default {
         const displayMessage = (msg, type = 'info') => {
             messagesDiv.textContent = msg;
             messagesDiv.style.display = '';
-            messagesDiv.style.color = type === 'error' ? '#c00' : '#b58900';
+            messagesDiv.style.color = type === 'error' ? '#d32f2f' : '#b58900';
         };
         const hideMessage = () => { messagesDiv.textContent = ''; messagesDiv.style.display = 'none'; };
 
@@ -326,9 +412,9 @@ export default {
                         <td>\${formatBytes(file.size)}</td>
                         <td>\${new Date(file.uploaded).toLocaleString()}</td>
                         <td class="actions">
-                            \${isText ? \`<button data-key="\${file.key}" data-name="\${fileName}" data-action="view">View</button>\` : ''}
+                            \${isText ? \`<button class="btn" data-key="\${file.key}" data-name="\${fileName}" data-action="view">View</button>\` : ''}
                             <a href="/\${file.key}" target="_blank" rel="noopener noreferrer" class="btn">Download</a>
-                            <button class="danger" data-key="\${file.key}" data-type="file">Delete</button>
+                            <button class="btn danger" data-key="\${file.key}" data-type="file">Delete</button>
                         </td>
                     \`;
                     fileListBody.appendChild(row);
