@@ -3,7 +3,6 @@ import time
 import datetime
 import socket
 import mimetypes
-# Removed: import logging
 
 import boto3
 from botocore.client import Config
