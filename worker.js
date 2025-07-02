@@ -269,6 +269,7 @@ export default {
             display: flex;
             gap: 0.5em;
             align-items: center;
+            justify-content: center; /* Add this to center actions horizontally */
         }
         .btn, button {
             font-family: inherit;
