@@ -124,22 +124,22 @@ export default {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KSS File Browser - Secure Cloud File Manager</title>
+    <title>KSS File Browser | Cloud File Manager & Index</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
         body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #f5f7fa; color: #23272a; }
         .slide-up { 
             opacity: 0; 
-            transform: translateY(40px); 
-            animation: slideUp 0.7s cubic-bezier(.4,2,.6,1) forwards; 
+            transform: translateY(10px); 
+            animation: slideUp 0.35s cubic-bezier(.4,2,.6,1) forwards; 
         }
         @keyframes slideUp {
             to { opacity: 1; transform: none; }
         }
         .slide-heading {
             opacity: 0;
-            transform: translateX(-60px);
-            animation: slideHeading 0.7s cubic-bezier(.4,2,.6,1) forwards;
+            transform: translateX(-20px);
+            animation: slideHeading 0.35s cubic-bezier(.4,2,.6,1) forwards;
         }
         @keyframes slideHeading {
             to { opacity: 1; transform: none; }
@@ -153,10 +153,10 @@ export default {
             text-align: center;
         }
         h2 {
-            font-size: 1.2em;
-            color: #1976d2;
-            font-weight: 600;
-            margin: 0.5em 0 1em 0;
+            font-size: 1.1em;
+            color: #333;
+            font-weight: 500;
+            margin: 0.5em 0 1.2em 0;
             text-align: center;
         }
         .breadcrumb-nav { margin-bottom: 1em; }
@@ -164,12 +164,10 @@ export default {
             color: #1976d2; 
             text-decoration: none; 
             margin-right: 0.2em; 
-            font-weight: 500;
-            border-bottom: 2px solid transparent;
-            transition: border 0.2s;
+            font-weight: 600;
         }
         .breadcrumb-nav a:hover { 
-            border-bottom: 2px solid #1976d2;
+            text-decoration: underline;
         }
         .back-btn {
             display: inline-flex;
@@ -223,10 +221,10 @@ export default {
             border-bottom: 2px solid #e3e8ee;
         }
         tr {
-            transition: background 0.15s;
+            background: #fff;
         }
         tr:hover {
-            background: #eaf2fb;
+            background: #f0f4fa;
         }
         td {
             font-size: 1.01rem;
@@ -269,34 +267,20 @@ export default {
         }
         /* Ripple effect */
         .btn:after, button:after {
-            content: "";
-            display: block;
-            position: absolute;
-            border-radius: 50%;
-            width: 100px; height: 100px;
-            left: 50%; top: 50%;
-            pointer-events: none;
-            background: rgba(25, 118, 210, 0.15);
-            transform: translate(-50%, -50%) scale(0);
-            transition: transform 0.3s, opacity 0.8s;
-            opacity: 0;
-        }
-        .btn:active:after, button:active:after {
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 1;
-            transition: 0s;
+            display: none;
         }
         /* File/folder links */
         a.item-link {
-            color: #23272a;
-            font-weight: 600;
+            color: #1976d2;
+            font-weight: 700;
             text-decoration: none;
-            border-bottom: 2px solid transparent;
-            transition: color 0.18s, border 0.18s;
+            background: none;
+            border-bottom: none;
+            transition: color 0.18s;
         }
         a.item-link:hover {
-            color: #1976d2;
-            border-bottom: 2px solid #1976d2;
+            color: #0d47a1;
+            text-decoration: underline;
         }
         #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
         #text-viewer-modal .modal-content { background: #fff; color: #23272a; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
@@ -313,8 +297,8 @@ export default {
 </head>
 <body>
     <div class="slide-up">
-        <h1 class="slide-heading">KSS File Browser</h1>
-        <h2>Secure Cloud File Manager &mdash; Browse, View, Download, and Delete Files</h2>
+        <h1 class="slide-heading">KSS File Browser & Index</h1>
+        <h2>Browse, preview, download, and manage your files and folders in the cloud. Click a folder to open, or a file to view/download.</h2>
         <nav id="breadcrumb-nav" class="breadcrumb-nav"></nav>
         <button id="back-btn" class="back-btn" style="display:none;">
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
@@ -325,7 +309,7 @@ export default {
             <table>
                 <thead>
                     <tr>
-                        <th>File/Folder Name</th>
+                        <th>Name</th>
                         <th>Type</th>
                         <th>Size</th>
                         <th>Last Modified</th>
