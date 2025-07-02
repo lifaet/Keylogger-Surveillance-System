@@ -241,6 +241,19 @@ export default {
             font-weight: 700;
             font-size: 1.08rem;
             border-bottom: 2px solid var(--border);
+            text-align: center; /* Center align table headers */
+        }
+        td {
+            font-size: 1.04rem;
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+        /* Center all td except the first (file/folder name) */
+        td:not(:first-child) {
+            text-align: center;
+        }
+        td:first-child {
+            text-align: left;
         }
         tr {
             background: var(--bg-panel);
@@ -248,12 +261,6 @@ export default {
         }
         tr:hover {
             background: var(--table-row-hover);
-        }
-        td {
-            font-size: 1.04rem;
-            border-bottom: 1px solid var(--border);
-            text-align: left;
-            vertical-align: middle;
         }
         tr:last-child td {
             border-bottom: none;
