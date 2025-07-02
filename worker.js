@@ -127,19 +127,39 @@ export default {
     <title>KSS File Browser | Cloud File Manager & Index</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #f5f7fa; color: #23272a; }
+        :root {
+            --bg-main: #f5f7fa;
+            --bg-panel: #fff;
+            --border: #e3e8ee;
+            --text-main: #23272a;
+            --text-muted: #6c757d;
+            --accent: #1976d2;
+            --accent-hover: #1251a3;
+            --danger-bg: #ffeaea;
+            --danger: #d32f2f;
+            --danger-hover: #b71c1c;
+            --table-row-hover: #f0f4fa;
+            --btn-bg: #e3e8ee;
+            --btn-bg-hover: #1976d2;
+        }
+        body {
+            font-family: 'Fira Mono', 'Consolas', 'Menlo', 'Monaco', monospace;
+            margin: 2em;
+            background: var(--bg-main);
+            color: var(--text-main);
+        }
         .slide-up { 
             opacity: 0; 
-            transform: translateY(10px); 
-            animation: slideUp 0.35s cubic-bezier(.4,2,.6,1) forwards; 
+            transform: translateY(8px); 
+            animation: slideUp 0.18s cubic-bezier(.4,2,.6,1) forwards; 
         }
         @keyframes slideUp {
             to { opacity: 1; transform: none; }
         }
         .slide-heading {
             opacity: 0;
-            transform: translateX(-20px);
-            animation: slideHeading 0.35s cubic-bezier(.4,2,.6,1) forwards;
+            transform: translateX(-10px);
+            animation: slideHeading 0.18s cubic-bezier(.4,2,.6,1) forwards;
         }
         @keyframes slideHeading {
             to { opacity: 1; transform: none; }
@@ -149,24 +169,25 @@ export default {
             margin-bottom: 0.2em; 
             font-weight: 800; 
             letter-spacing: -1px;
-            color: #1976d2;
+            color: var(--accent);
             text-align: center;
         }
         h2 {
             font-size: 1.1em;
-            color: #333;
+            color: var(--text-muted);
             font-weight: 500;
             margin: 0.5em 0 1.2em 0;
             text-align: center;
         }
         .breadcrumb-nav { margin-bottom: 1em; }
         .breadcrumb-nav a { 
-            color: #1976d2; 
+            color: var(--accent); 
             text-decoration: none; 
             margin-right: 0.2em; 
             font-weight: 600;
         }
         .breadcrumb-nav a:hover { 
+            color: var(--accent-hover);
             text-decoration: underline;
         }
         .back-btn {
@@ -174,7 +195,7 @@ export default {
             align-items: center;
             gap: 0.5em;
             margin-bottom: 1em;
-            background: #1976d2;
+            background: var(--accent);
             color: #fff;
             border: none;
             border-radius: 6px;
@@ -186,7 +207,7 @@ export default {
             transition: background 0.18s, color 0.18s;
         }
         .back-btn:hover {
-            background: #1251a3;
+            background: var(--accent-hover);
             color: #fff;
         }
         .back-btn svg {
@@ -197,11 +218,12 @@ export default {
         }
         .message { margin: 1em 0; color: #b58900; }
         .table-container {
-            background: #fff;
-            border-radius: 12px;
-            box-shadow: 0 2px 16px #0001;
+            background: var(--bg-panel);
+            border-radius: 14px;
+            box-shadow: 0 2px 16px #0002;
             overflow-x: auto;
             padding: 0.5em 0.5em 0.5em 0.5em;
+            border: 1px solid var(--border);
         }
         table {
             width: 100%;
@@ -210,25 +232,28 @@ export default {
             background: transparent;
         }
         th, td {
-            padding: 0.85em 1em;
+            padding: 1.1em 1em;
             text-align: left;
         }
         th {
-            background: #f5f7fa;
-            color: #1976d2;
+            background: var(--bg-panel);
+            color: var(--accent);
             font-weight: 700;
-            font-size: 1.05rem;
-            border-bottom: 2px solid #e3e8ee;
+            font-size: 1.08rem;
+            border-bottom: 2px solid var(--border);
         }
         tr {
-            background: #fff;
+            background: var(--bg-panel);
+            transition: background 0.13s;
         }
         tr:hover {
-            background: #f0f4fa;
+            background: var(--table-row-hover);
         }
         td {
-            font-size: 1.01rem;
-            border-bottom: 1px solid #e3e8ee;
+            font-size: 1.04rem;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            vertical-align: middle;
         }
         tr:last-child td {
             border-bottom: none;
@@ -236,6 +261,7 @@ export default {
         .actions {
             display: flex;
             gap: 0.5em;
+            align-items: center;
         }
         .btn, button {
             font-family: inherit;
@@ -243,51 +269,54 @@ export default {
             border: none;
             outline: none;
             border-radius: 6px;
-            padding: 0.38em 1.1em;
+            padding: 0.38em 1.3em;
             cursor: pointer;
-            background: #e3e8ee;
-            color: #1976d2;
+            background: var(--btn-bg);
+            color: var(--accent);
             font-weight: 500;
-            box-shadow: 0 1px 2px #0001;
+            box-shadow: 0 1px 2px #0002;
             position: relative;
             overflow: hidden;
             transition: background 0.18s, color 0.18s;
+            letter-spacing: 0.5px;
         }
         .btn:hover, button:hover {
-            background: #1976d2;
+            background: var(--btn-bg-hover);
             color: #fff;
         }
         .danger {
-            background: #ffeaea;
-            color: #d32f2f;
+            background: var(--danger-bg);
+            color: var(--danger);
         }
         .danger:hover {
-            background: #d32f2f;
+            background: var(--danger-hover);
             color: #fff;
         }
-        /* Ripple effect */
-        .btn:after, button:after {
-            display: none;
+        a.btn {
+            text-decoration: none;
+            display: inline-block;
         }
         /* File/folder links */
         a.item-link {
-            color: #1976d2;
+            color: var(--text-main);
             font-weight: 700;
             text-decoration: none;
             background: none;
             border-bottom: none;
             transition: color 0.18s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         a.item-link:hover {
-            color: #0d47a1;
+            color: var(--accent);
             text-decoration: underline;
         }
-        #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
-        #text-viewer-modal .modal-content { background: #fff; color: #23272a; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
+        #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(245,247,250,0.92); align-items: center; justify-content: center; z-index: 1000; }
+        #text-viewer-modal .modal-content { background: var(--bg-panel); color: var(--text-main); padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
         #text-viewer-modal .modal-header { display: flex; justify-content: space-between; align-items: center; }
         #text-viewer-modal .modal-close-button { background: none; border: none; font-size: 1.3em; cursor: pointer; color: #888; }
-        #text-viewer-modal .modal-close-button:hover { color: #d32f2f; }
-        pre { background: #f5f7fa; padding: 0.7em; border-radius: 6px; overflow-x: auto; }
+        #text-viewer-modal .modal-close-button:hover { color: var(--danger); }
+        pre { background: #f5f7fa; color: var(--text-main); padding: 0.7em; border-radius: 6px; overflow-x: auto; }
         @media (max-width: 600px) {
             .table-container { padding: 0.2em; }
             th, td { padding: 0.5em 0.4em; }
@@ -362,7 +391,7 @@ export default {
         };
 
         const showTextViewer = async (fileKey, fileName) => {
-            modalFileName.textContent = fileName;
+            modalFileName.textContent = fileName.toUpperCase();
             modalTextContent.textContent = 'Loading...';
             textViewerModal.style.display = 'flex';
             try {
@@ -408,7 +437,7 @@ export default {
                 span.textContent = ' / ';
                 breadcrumbNav.appendChild(span);
                 const segmentLink = document.createElement('a');
-                segmentLink.href = '#'; segmentLink.textContent = segment;
+                segmentLink.href = '#'; segmentLink.textContent = segment.toUpperCase();
                 segmentLink.onclick = (e) => { e.preventDefault(); navigateToFolder(cumulativePrefix); };
                 breadcrumbNav.appendChild(segmentLink);
             });
@@ -436,8 +465,8 @@ export default {
                     const folderName = folderPrefix.replace(currentPrefix, '').replace('/', '');
                     const row = document.createElement('tr');
                     row.innerHTML = \`
-                        <td><a href="#" class="item-link" data-prefix="\${folderPrefix}">\${folderName}</a></td>
-                        <td>Folder</td><td></td><td></td>
+                        <td><a href="#" class="item-link" data-prefix="\${folderPrefix}">\${folderName.toUpperCase()}</a></td>
+                        <td>FOLDER</td><td></td><td></td>
                         <td class="actions">
                             <button class="btn danger" data-key="\${folderPrefix}" data-type="folder">Delete</button>
                         </td>
@@ -450,8 +479,8 @@ export default {
                     const isText = isTextFile(fileName);
                     const row = document.createElement('tr');
                     row.innerHTML = \`
-                        <td><a href="/\${file.key}" target="_blank" rel="noopener noreferrer" class="item-link" data-key="\${file.key}" data-type="file">\${fileName}</a></td>
-                        <td>File</td>
+                        <td><a href="/\${file.key}" target="_blank" rel="noopener noreferrer" class="item-link" data-key="\${file.key}" data-type="file">\${fileName.toUpperCase()}</a></td>
+                        <td>FILE</td>
                         <td>\${formatBytes(file.size)}</td>
                         <td>\${new Date(file.uploaded).toLocaleString()}</td>
                         <td class="actions">
