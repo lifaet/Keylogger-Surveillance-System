@@ -124,10 +124,10 @@ export default {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KSS File Browser</title>
+    <title>KSS File Browser - Secure Cloud File Manager</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #181a1b; color: #e0e0e0; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 2em; background: #f5f7fa; color: #23272a; }
         .slide-up { 
             opacity: 0; 
             transform: translateY(40px); 
@@ -145,39 +145,63 @@ export default {
             to { opacity: 1; transform: none; }
         }
         h1 { 
-            font-size: 2.1em; 
+            font-size: 2.2em; 
             margin-bottom: 0.2em; 
-            font-weight: 700; 
+            font-weight: 800; 
             letter-spacing: -1px;
-            color: #90caf9;
+            color: #1976d2;
+            text-align: center;
+        }
+        h2 {
+            font-size: 1.2em;
+            color: #1976d2;
+            font-weight: 600;
+            margin: 0.5em 0 1em 0;
             text-align: center;
         }
         .breadcrumb-nav { margin-bottom: 1em; }
-        .breadcrumb-nav a { color: #90caf9; text-decoration: none; margin-right: 0.2em; }
-        .breadcrumb-nav a:hover { text-decoration: underline; }
+        .breadcrumb-nav a { 
+            color: #1976d2; 
+            text-decoration: none; 
+            margin-right: 0.2em; 
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: border 0.2s;
+        }
+        .breadcrumb-nav a:hover { 
+            border-bottom: 2px solid #1976d2;
+        }
         .back-btn {
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5em;
             margin-bottom: 1em;
-            background: #23272a;
-            color: #90caf9;
+            background: #1976d2;
+            color: #fff;
             border: none;
             border-radius: 6px;
-            padding: 0.4em 1.2em;
+            padding: 0.4em 1.4em;
             font-size: 1em;
-            font-weight: 500;
+            font-weight: 600;
             cursor: pointer;
-            box-shadow: 0 1px 4px #0005;
+            box-shadow: 0 1px 4px #0002;
             transition: background 0.18s, color 0.18s;
         }
         .back-btn:hover {
-            background: #90caf9;
-            color: #181a1b;
+            background: #1251a3;
+            color: #fff;
         }
-        .message { margin: 1em 0; color: #ffe082; }
+        .back-btn svg {
+            width: 1.1em;
+            height: 1.1em;
+            vertical-align: middle;
+            fill: currentColor;
+        }
+        .message { margin: 1em 0; color: #b58900; }
         .table-container {
-            background: #23272a;
+            background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 16px #0008;
+            box-shadow: 0 2px 16px #0001;
             overflow-x: auto;
             padding: 0.5em 0.5em 0.5em 0.5em;
         }
@@ -192,21 +216,21 @@ export default {
             text-align: left;
         }
         th {
-            background: #23272a;
-            color: #90caf9;
-            font-weight: 600;
-            font-size: 1.01rem;
-            border-bottom: 2px solid #424242;
+            background: #f5f7fa;
+            color: #1976d2;
+            font-weight: 700;
+            font-size: 1.05rem;
+            border-bottom: 2px solid #e3e8ee;
         }
         tr {
             transition: background 0.15s;
         }
         tr:hover {
-            background: #22262a;
+            background: #eaf2fb;
         }
         td {
             font-size: 1.01rem;
-            border-bottom: 1px solid #292b2f;
+            border-bottom: 1px solid #e3e8ee;
         }
         tr:last-child td {
             border-bottom: none;
@@ -223,25 +247,25 @@ export default {
             border-radius: 6px;
             padding: 0.38em 1.1em;
             cursor: pointer;
-            background: #31363b;
-            color: #90caf9;
+            background: #e3e8ee;
+            color: #1976d2;
             font-weight: 500;
-            box-shadow: 0 1px 2px #0003;
+            box-shadow: 0 1px 2px #0001;
             position: relative;
             overflow: hidden;
             transition: background 0.18s, color 0.18s;
         }
         .btn:hover, button:hover {
-            background: #90caf9;
-            color: #181a1b;
+            background: #1976d2;
+            color: #fff;
         }
         .danger {
-            background: #3a2323;
-            color: #ef5350;
+            background: #ffeaea;
+            color: #d32f2f;
         }
         .danger:hover {
-            background: #ef5350;
-            color: #181a1b;
+            background: #d32f2f;
+            color: #fff;
         }
         /* Ripple effect */
         .btn:after, button:after {
@@ -252,7 +276,7 @@ export default {
             width: 100px; height: 100px;
             left: 50%; top: 50%;
             pointer-events: none;
-            background: rgba(144, 202, 249, 0.15);
+            background: rgba(25, 118, 210, 0.15);
             transform: translate(-50%, -50%) scale(0);
             transition: transform 0.3s, opacity 0.8s;
             opacity: 0;
@@ -262,12 +286,24 @@ export default {
             opacity: 1;
             transition: 0s;
         }
+        /* File/folder links */
+        a.item-link {
+            color: #23272a;
+            font-weight: 600;
+            text-decoration: none;
+            border-bottom: 2px solid transparent;
+            transition: color 0.18s, border 0.18s;
+        }
+        a.item-link:hover {
+            color: #1976d2;
+            border-bottom: 2px solid #1976d2;
+        }
         #text-viewer-modal { display: none; position: fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); align-items: center; justify-content: center; z-index: 1000; }
-        #text-viewer-modal .modal-content { background: #23272a; color: #e0e0e0; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #000a;}
+        #text-viewer-modal .modal-content { background: #fff; color: #23272a; padding: 1em; border-radius: 10px; max-width: 700px; width: 95vw; max-height: 80vh; overflow-y: auto; box-shadow: 0 2px 16px #0002;}
         #text-viewer-modal .modal-header { display: flex; justify-content: space-between; align-items: center; }
         #text-viewer-modal .modal-close-button { background: none; border: none; font-size: 1.3em; cursor: pointer; color: #888; }
-        #text-viewer-modal .modal-close-button:hover { color: #ef5350; }
-        pre { background: #181a1b; padding: 0.7em; border-radius: 6px; overflow-x: auto; color: #e0e0e0; }
+        #text-viewer-modal .modal-close-button:hover { color: #d32f2f; }
+        pre { background: #f5f7fa; padding: 0.7em; border-radius: 6px; overflow-x: auto; }
         @media (max-width: 600px) {
             .table-container { padding: 0.2em; }
             th, td { padding: 0.5em 0.4em; }
@@ -278,14 +314,18 @@ export default {
 <body>
     <div class="slide-up">
         <h1 class="slide-heading">KSS File Browser</h1>
+        <h2>Secure Cloud File Manager &mdash; Browse, View, Download, and Delete Files</h2>
         <nav id="breadcrumb-nav" class="breadcrumb-nav"></nav>
-        <button id="back-btn" class="back-btn" style="display:none;">&#8592; Back</button>
+        <button id="back-btn" class="back-btn" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
+            Back
+        </button>
         <div id="messages" class="message"></div>
         <div class="table-container">
             <table>
                 <thead>
                     <tr>
-                        <th>Name</th>
+                        <th>File/Folder Name</th>
                         <th>Type</th>
                         <th>Size</th>
                         <th>Last Modified</th>
@@ -327,7 +367,7 @@ export default {
         const displayMessage = (msg, type = 'info') => {
             messagesDiv.textContent = msg;
             messagesDiv.style.display = '';
-            messagesDiv.style.color = type === 'error' ? '#ef5350' : '#ffe082';
+            messagesDiv.style.color = type === 'error' ? '#d32f2f' : '#b58900';
         };
         const hideMessage = () => { messagesDiv.textContent = ''; messagesDiv.style.display = 'none'; };
 
