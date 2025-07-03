@@ -26,9 +26,6 @@ def setup_logger(log_filename, logger_name):
     return logger
 
 def key_logger():
-    """
-    Starts the key logger and writes keystrokes to a daily log file.
-    """
     log_console("Key Logger started and running...", "INFO")
     log_filename = get_daily_log_filename("keylog")
     logger = setup_logger(log_filename, "KeyLogger")
@@ -48,9 +45,6 @@ def key_logger():
         sys.exit(1)
 
 def dns_logger():
-    """
-    Starts the DNS logger and writes DNS queries to a daily log file.
-    """
     log_console("DNS Query Logger started and running...", "INFO")
     log_filename = get_daily_log_filename("dnslog")
     logger = setup_logger(log_filename, "DNSLogger")
@@ -80,7 +74,6 @@ def dns_logger():
         if not iface:
             log_console("Could not determine active network interface.", "ERROR")
             sys.exit(1)
-        log_console(f"Listening on interface: {iface}", "INFO")
         scapy.sniff(iface=iface, store=False, prn=process_packet)
     except PermissionError:
         log_console("Permission denied: Run as administrator/root to sniff packets.", "ERROR")

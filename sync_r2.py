@@ -47,7 +47,6 @@ class R2FolderSync:
                 config=Config(signature_version='s3v4'),
                 region_name='auto'
             )
-            log_console("R2 client initialized.", "SUCCESS")
             return client
         except Exception as e:
             log_console(f"Unexpected error during R2 client setup: {e}", "ERROR")
@@ -162,11 +161,6 @@ class R2FolderSync:
 
     def start_sync_loop(self):
         """Starts the synchronization loop, checking the internet connection and syncing at regular intervals."""
-        print("--- Cloudflare R2 Folder Sync Loop Started ---")
-        print(f"Local folder to sync: '{self.LOCAL_FOLDER_TO_SYNC}'")
-        print(f"Sync interval: {self.SYNC_INTERVAL_SECONDS} seconds")
-        print("Press Ctrl+C to stop the script.")
-
         try:
             while True:
                 if self.check_internet_connection():
@@ -179,7 +173,7 @@ class R2FolderSync:
         except KeyboardInterrupt:
             print("Sync loop stopped by user.")
         except Exception as e:
-            print(f"CRITICAL ERROR: An unhandled critical error occurred in the main loop: {e}")
+            log_console(f"Error during sync: {e}", "ERROR")
 
 # Example usage from another script:
 # from sync_r2 import R2FolderSync
