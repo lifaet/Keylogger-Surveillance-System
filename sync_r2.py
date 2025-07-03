@@ -174,9 +174,3 @@ class R2FolderSync:
             print("Sync loop stopped by user.")
         except Exception as e:
             log_console(f"Error during sync: {e}", "ERROR")
-
-# Example usage from another script:
-# from sync_r2 import R2FolderSync
-# syncer = R2FolderSync(local_folder="example", sync_interval=5)
-# syncer.sync_once()  # For one-time sync
-# syncer.start_sync_loop()  # For continuous sync
