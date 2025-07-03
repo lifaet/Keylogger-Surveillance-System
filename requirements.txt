@@ -1,7 +1,8 @@
+boto3
+botocore
+python-dotenv
 scapy
-ftputil
-logging
 keyboard
-datetime
 netifaces
 pywin32
+psutil
