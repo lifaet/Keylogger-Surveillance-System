@@ -31,6 +31,7 @@ export default {
     <meta charset="UTF-8">
     <title>KSS Login</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://lifaet.github.io/assets/images/favicon.ico" type="image/x-icon">
     <style>
         body { font-family: monospace; background: #f5f7fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
         .login-box { background: #fff; padding: 2em 2.5em; border-radius: 10px; box-shadow: 0 2px 16px #0002; display: flex; flex-direction: column; align-items: center; }
@@ -157,8 +158,9 @@ export default {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>KSS File Browser | Cloud File Manager & Index</title>
+    <title>KSS File Manager</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="https://lifaet.github.io/assets/images/favicon.ico" type="image/x-icon">
     <style>
         :root {
             --bg-main: #f5f7fa;
@@ -385,8 +387,8 @@ export default {
 <body>
     <button id="logout-btn" class="logout-btn">Log Out</button>
     <div class="slide-up">
-        <h1 class="slide-heading">KSS File Browser & Index</h1>
-        <h2>Browse, preview, download, and manage your files and folders in the cloud. Click a folder to open, or a file to view/download.</h2>
+        <h1 class="slide-heading">KSS File Manager</h1>
+        <h2>Browse, preview, download, and manage KSS files and folders in the cloud.</h2>
         <nav id="breadcrumb-nav" class="breadcrumb-nav"></nav>
         <button id="back-btn" class="back-btn" style="display:none;">
             <svg viewBox="0 0 24 24"><path d="M15.41 7.41 14 6l-6 6 6 6 1.41-1.41L10.83 12z"/></svg>
