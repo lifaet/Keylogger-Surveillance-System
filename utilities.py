@@ -90,6 +90,9 @@ def sync(sync_interval=30, continuous=False):
 
 
 class AuthHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Suppress all HTTP server logs
+        pass
     def do_GET(self):
         auth_header = self.headers.get("Authorization")
         if not auth_header:
@@ -109,7 +112,6 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error(401, "Unauthorized")
             log_console("Unauthorized", "WARNING")
             return
-        log_console(f"Authorized: {self.client_address[0]}", "INFO")
         super().do_GET()
 
 
