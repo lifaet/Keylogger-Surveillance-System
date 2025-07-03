@@ -5,6 +5,8 @@ import winreg
 import http.server
 import base64
 import socketserver
+import netifaces
+import platform
 from log_utils import log_console
 from sync_r2 import R2FolderSync
 
@@ -127,15 +129,35 @@ def server(port=8000):
         except KeyboardInterrupt:
             log_console("Server stopped", "INFO")
 
+def get_interface_name_windows(guid):
+    try:
+        import winreg
+        reg = winreg.ConnectRegistry(None, winreg.HKEY_LOCAL_MACHINE)
+        key = winreg.OpenKey(
+            reg,
+            r"SYSTEM\CurrentControlSet\Control\Network\{4d36e972-e325-11ce-bfc1-08002be10318}",
+        )
+        subkey = winreg.OpenKey(key, guid + r"\Connection")
+        name = winreg.QueryValueEx(subkey, "Name")[0]
+        return name
+    except Exception as e:
+        log_console(f"Error getting Windows interface name: {e}", "ERROR")
+        return None
 
 def active_interface():
-    # TODO: Implement actual logic if needed
-    return "Ethernet"
-
-
-def key_logger():
-    log_console("Key Logger started and running...", "INFO")
-    log_dir = dir_path()  # Ensure this returns the full path to your log directory
-    log_filename = os.path.join(log_dir, f"keylog-{user_name()}_{current_time()}.txt")
-    # logger = setup_logger(log_filename, "KeyLogger")
-    # ... rest of your code ...
+    try:
+        gateways = netifaces.gateways()
+        default_gateway = gateways.get('default', {})
+        iface = None
+        if netifaces.AF_INET in default_gateway:
+            iface = default_gateway[netifaces.AF_INET][1]
+        if not iface:
+            return None
+        if platform.system() == "Windows":
+            name = get_interface_name_windows(iface)
+            return name if name else iface
+        else:
+            return iface
+    except Exception as e:
+        log_console(f"Error getting active interface: {e}", "ERROR")
+        return None

