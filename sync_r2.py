@@ -115,7 +115,7 @@ class R2FolderSync:
             if error_code == 'AccessDenied':
                 print("  HINT: Check your R2 API token permissions for 's3:PutObject' action on this bucket.")
             elif error_code == 'NoSuchBucket':
-                print(f"  HINT: The specified R2 bucket '{CF_R2_BUCKET_NAME}' does not exist or you don't have access.")
+                print(f"  HINT: The specified R2 bucket does not exist or you don't have access.")
             return False
         except FileNotFoundError:
             print(f"[SKIPPED] Local file not found: '{local_path}'. It might have been deleted before upload.")
