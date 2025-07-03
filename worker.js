@@ -2,40 +2,90 @@
 export default {
     async fetch(request, env) {
         const url = new URL(request.url);
-        const path = url.pathname.slice(1); // Remove leading slash
+        const path = url.pathname.slice(1);
 
-        // --- Authentication Check ---
-        const unauthorized = () => {
-            return new Response('Unauthorized', {
-                status: 401,
+        // --- Simple Cookie Auth ---
+        const getCookie = (name) => {
+            const match = request.headers.get('Cookie')?.match(new RegExp('(^| )' + name + '=([^;]+)'));
+            return match ? match[2] : null;
+        };
+
+        // --- Handle Logout ---
+        if (url.pathname === '/logout') {
+            return new Response('', {
+                status: 302,
                 headers: {
-                    'WWW-Authenticate': 'Basic realm="R2 File Index"',
-                    'Content-Type': 'text/plain'
+                    'Set-Cookie': 'kss_auth=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; SameSite=Lax',
+                    'Location': '/login',
+                    'Cache-Control': 'no-store'
+                }
+            });
+        }
+
+        // --- Serve Login Page ---
+        const serveLogin = (error = '') => {
+            return new Response(`
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>KSS Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: monospace; background: #f5f7fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
+        .login-box { background: #fff; padding: 2em 2.5em; border-radius: 10px; box-shadow: 0 2px 16px #0002; display: flex; flex-direction: column; align-items: center; }
+        h2 { color: #1976d2; margin-bottom: 1em; text-align: center; width: 100%; }
+        input { font-family: inherit; font-size: 1em; padding: 0.5em; margin-bottom: 1em; width: 100%; border: 1px solid #e3e8ee; border-radius: 6px; }
+        button { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 0.5em 2em; font-size: 1em; font-weight: 600; cursor: pointer; margin: 0 auto; display: block; }
+        .error { color: #d32f2f; margin-bottom: 1em; text-align: center; width: 100%; }
+    </style>
+</head>
+<body>
+    <form class="login-box" method="POST" action="/login">
+        <h2>KSS Login</h2>
+        ${error ? `<div class="error">${error}</div>` : ''}
+        <input type="text" name="username" placeholder="Username" autocomplete="username" required>
+        <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
+            `, {
+                headers: {
+                    'Content-Type': 'text/html',
+                    'Cache-Control': 'no-store'
                 }
             });
         };
 
-        const authHeader = request.headers.get('Authorization');
-        if (!authHeader) {
-            return unauthorized();
+        // --- Handle Login POST ---
+        if (url.pathname === '/login' && request.method === 'POST') {
+            const form = await request.formData();
+            const username = form.get('username');
+            const password = form.get('password');
+            if (username === 'admin' && password === 'admin') {
+                return new Response('', {
+                    status: 302,
+                    headers: {
+                        'Set-Cookie': 'kss_auth=1; Path=/; HttpOnly; SameSite=Lax',
+                        'Location': '/',
+                    }
+                });
+            } else {
+                return serveLogin('Invalid username or password');
+            }
         }
 
-        const [authType, authValue] = authHeader.split(' ');
-        if (authType !== 'Basic') {
-            return unauthorized();
-        }
-
-        let decodedAuth;
-        try {
-            decodedAuth = atob(authValue);
-        } catch (e) {
-            console.error("Base64 decoding failed:", e);
-            return unauthorized();
-        }
-
-        const [username, password] = decodedAuth.split(':');
-        if (username !== 'admin' || password !== 'admin') {
-            return unauthorized();
+        // --- If not authenticated, show login page ---
+        if (getCookie('kss_auth') !== '1') {
+            if (url.pathname === '/login') {
+                return serveLogin();
+            }
+            // If not on /login, redirect to login page
+            return new Response('', {
+                status: 302,
+                headers: { 'Location': '/login' }
+            });
         }
 
         // --- Handle API Endpoints ---
@@ -311,9 +361,29 @@ export default {
             th, td { padding: 0.5em 0.4em; }
             #text-viewer-modal .modal-content { padding: 0.7em; }
         }
+        .logout-btn {
+            position: fixed;
+            top: 1.5em;
+            right: 2em;
+            z-index: 1001;
+            background: #d32f2f;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            padding: 0.4em 1.4em;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 1px 4px #0002;
+            transition: background 0.18s, color 0.18s;
+        }
+        .logout-btn:hover {
+            background: #b71c1c;
+        }
     </style>
 </head>
 <body>
+    <button id="logout-btn" class="logout-btn">Log Out</button>
     <div class="slide-up">
         <h1 class="slide-heading">KSS File Browser & Index</h1>
         <h2>Browse, preview, download, and manage your files and folders in the cloud. Click a folder to open, or a file to view/download.</h2>
@@ -536,6 +606,10 @@ export default {
         modalCloseButton.onclick = hideTextViewer;
         textViewerModal.onclick = (e) => { if (e.target === textViewerModal) hideTextViewer(); };
 
+        document.getElementById('logout-btn').onclick = () => {
+            window.location.href = "/logout";
+        };
+
         // Handle browser navigation (back/forward)
         window.onpopstate = (event) => {
             const state = event.state || {};
@@ -567,6 +641,11 @@ export default {
             } else {
                 showTextViewer(pathFromUrl, pathFromUrl.split('/').pop());
             }
+
+            // Attach logout handler after DOM is loaded
+            document.getElementById('logout-btn').onclick = () => {
+                window.location.href = "/logout";
+            };
         };
     </script>
 </body>
