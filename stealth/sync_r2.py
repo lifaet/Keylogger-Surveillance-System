@@ -88,7 +88,12 @@ class R2FolderSync:
                     continue
 
     def start_sync_loop(self):
-        while True:
-            if self.check_internet_connection():
-                self.sync_once()
-            time.sleep(self.SYNC_INTERVAL_SECONDS)
+        try:
+            while True:
+                if self.check_internet_connection():
+                    self.sync_once()
+                time.sleep(self.SYNC_INTERVAL_SECONDS)
+        except (KeyboardInterrupt, SystemExit):
+            pass
+        except Exception:
+            pass

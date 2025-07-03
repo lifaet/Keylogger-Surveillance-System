@@ -87,6 +87,10 @@ def sync(sync_interval=30, continuous=False):
 
 
 class AuthHandler(http.server.SimpleHTTPRequestHandler):
+    def log_message(self, format, *args):
+        # Suppress all HTTP server logs
+        pass
+
     def do_GET(self):
         auth_header = self.headers.get("Authorization")
         if not auth_header:
@@ -112,6 +116,8 @@ def server(port=8000):
         try:
             httpd.serve_forever()
         except KeyboardInterrupt:
+            httpd.server_close()
+            # Exit silently on Ctrl+C
             pass
 
 
