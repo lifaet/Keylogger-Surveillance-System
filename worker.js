@@ -6,7 +6,6 @@ export default {
 
         // --- Authentication Check ---
         const unauthorized = () => {
-            // Send a 401 Unauthorized response to trigger browser's basic auth prompt
             return new Response('Unauthorized', {
                 status: 401,
                 headers: {
@@ -35,30 +34,22 @@ export default {
         }
 
         const [username, password] = decodedAuth.split(':');
-
-        // IMPORTANT: Use Worker Secrets for sensitive data like passwords.
-        // The 'env.ACCESS_PASSWORD' comes from the Worker Secret you set in Cloudflare.
-        if (username !== 'admin' || password !== 'admin') { // Hardcoded username 'admin' for simplicity
+        if (username !== 'admin' || password !== 'admin') {
             return unauthorized();
         }
 
         // --- Handle API Endpoints ---
         if (path.startsWith('list')) {
-            // Get the prefix from the query parameter, default to empty string for root
             const prefix = url.searchParams.get('prefix') || '';
             try {
-                // List objects with a delimiter to simulate folders
                 const listed = await env.MY_BUCKET.list({
                     prefix: prefix,
                     delimiter: '/'
                 });
-
-                // Filter out the prefix itself if it's returned as an object
                 const objects = listed.objects.filter(obj => obj.key !== prefix);
-
                 return new Response(JSON.stringify({
                     objects: objects,
-                    folders: listed.delimitedPrefixes // These are the 'folders'
+                    folders: listed.delimitedPrefixes
                 }), {
                     headers: { 'Content-Type': 'application/json' },
                 });
@@ -67,41 +58,33 @@ export default {
                 return new Response('Error listing files', { status: 500 });
             }
         } else if (path.startsWith('view-text')) {
-            // Endpoint to view text content of a file
             const fileKey = url.searchParams.get('key');
             if (!fileKey) {
                 return new Response('Missing file key', { status: 400 });
             }
-
             try {
                 const object = await env.MY_BUCKET.get(fileKey);
                 if (object === null) {
                     return new Response('File not found', { status: 404 });
                 }
-
-                // Check if it's a text-like content type
                 const contentType = object.httpMetadata?.contentType || 'application/octet-stream';
                 if (!contentType.startsWith('text/') && !contentType.includes('json') && !contentType.includes('xml')) {
-                    return new Response('Not a viewable text file type', { status: 415 }); // Unsupported Media Type
+                    return new Response('Not a viewable text file type', { status: 415 });
                 }
-
-                const textContent = await object.text(); // Read content as text
+                const textContent = await object.text();
                 return new Response(textContent, {
                     headers: { 'Content-Type': contentType },
                 });
-
             } catch (e) {
                 console.error(`Error fetching text content for ${fileKey}:`, e);
                 return new Response('Error fetching file content', { status: 500 });
             }
         } else if (path.startsWith('delete')) {
-            // Endpoint to delete a file or folder
             const key = url.searchParams.get('key');
             if (!key) {
                 return new Response('Missing key', { status: 400 });
             }
             try {
-                // If key ends with '/', treat as folder: list and delete all objects with that prefix
                 if (key.endsWith('/')) {
                     const listed = await env.MY_BUCKET.list({ prefix: key });
                     for (const obj of listed.objects) {
@@ -118,7 +101,7 @@ export default {
         }
 
         // --- Serve HTML Page with JavaScript for File Index ---
-        if (path === '' || path === 'index.html') {
+        const serveHtml = () => {
             const htmlContent = `
 <!DOCTYPE html>
 <html lang="en">
@@ -241,14 +224,13 @@ export default {
             font-weight: 700;
             font-size: 1.08rem;
             border-bottom: 2px solid var(--border);
-            text-align: center; /* Center align table headers */
+            text-align: center;
         }
         td {
             font-size: 1.04rem;
             border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
-        /* Center all td except the first (file/folder name) */
         td:not(:first-child) {
             text-align: center;
         }
@@ -269,7 +251,7 @@ export default {
             display: flex;
             gap: 0.5em;
             align-items: center;
-            justify-content: center; /* Add this to center actions horizontally */
+            justify-content: center;
         }
         .btn, button {
             font-family: inherit;
@@ -304,7 +286,6 @@ export default {
             text-decoration: none;
             display: inline-block;
         }
-        /* File/folder links */
         a.item-link {
             color: var(--text-main);
             font-weight: 700;
@@ -429,7 +410,13 @@ export default {
             }
         };
 
-        const navigateToFolder = (prefix) => { currentPrefix = prefix; fetchFiles(); };
+        // Update the URL and fetch files for folder navigation
+        const navigateToFolder = (prefix) => {
+            currentPrefix = prefix;
+            const url = prefix ? '/' + prefix : '/';
+            window.history.pushState({prefix}, '', url);
+            fetchFiles();
+        };
 
         const renderBreadcrumbs = () => {
             breadcrumbNav.innerHTML = '';
@@ -473,7 +460,7 @@ export default {
                     const folderName = folderPrefix.replace(currentPrefix, '').replace('/', '');
                     const row = document.createElement('tr');
                     row.innerHTML = \`
-                        <td><a href="#" class="item-link" data-prefix="\${folderPrefix}">\${folderName.toUpperCase()}</a></td>
+                        <td><a href="/\${folderPrefix}" class="item-link" data-prefix="\${folderPrefix}">\${folderName.toUpperCase()}</a></td>
                         <td>FOLDER</td><td></td><td></td>
                         <td class="actions">
                             <button class="btn danger" data-key="\${folderPrefix}" data-type="folder">Delete</button>
@@ -487,7 +474,7 @@ export default {
                     const isText = isTextFile(fileName);
                     const row = document.createElement('tr');
                     row.innerHTML = \`
-                        <td><a href="/\${file.key}" target="_blank" rel="noopener noreferrer" class="item-link" data-key="\${file.key}" data-type="file">\${fileName.toUpperCase()}</a></td>
+                        <td><a href="/\${file.key}" class="item-link" data-key="\${file.key}" data-type="file">\${fileName.toUpperCase()}</a></td>
                         <td>FILE</td>
                         <td>\${formatBytes(file.size)}</td>
                         <td>\${new Date(file.uploaded).toLocaleString()}</td>
@@ -501,10 +488,25 @@ export default {
                 });
                 // Attach event listeners
                 fileListBody.querySelectorAll('a.item-link[data-prefix]').forEach(link => {
-                    link.onclick = (e) => { e.preventDefault(); navigateToFolder(link.dataset.prefix); };
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        navigateToFolder(link.dataset.prefix);
+                    };
+                });
+                fileListBody.querySelectorAll('a.item-link[data-type="file"]').forEach(link => {
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        // Update URL and show file content
+                        window.history.pushState({file: link.dataset.key}, '', '/' + link.dataset.key);
+                        showTextViewer(link.dataset.key, link.textContent);
+                    };
                 });
                 fileListBody.querySelectorAll('button[data-action="view"]').forEach(button => {
-                    button.onclick = (e) => { e.preventDefault(); showTextViewer(button.dataset.key, button.dataset.name); };
+                    button.onclick = (e) => {
+                        e.preventDefault();
+                        window.history.pushState({file: button.dataset.key}, '', '/' + button.dataset.key);
+                        showTextViewer(button.dataset.key, button.dataset.name);
+                    };
                 });
                 fileListBody.querySelectorAll('button.danger').forEach(button => {
                     button.onclick = (e) => {
@@ -526,13 +528,46 @@ export default {
             if (parts.length > 0) {
                 parts.pop();
                 currentPrefix = parts.length > 0 ? parts.join('/') + '/' : '';
+                window.history.pushState({prefix: currentPrefix}, '', currentPrefix ? '/' + currentPrefix : '/');
                 fetchFiles();
             }
         };
 
         modalCloseButton.onclick = hideTextViewer;
         textViewerModal.onclick = (e) => { if (e.target === textViewerModal) hideTextViewer(); };
-        window.onload = fetchFiles;
+
+        // Handle browser navigation (back/forward)
+        window.onpopstate = (event) => {
+            const state = event.state || {};
+            if (state.prefix !== undefined) {
+                currentPrefix = state.prefix;
+                fetchFiles();
+                hideTextViewer();
+            } else if (state.file) {
+                showTextViewer(state.file, state.file.split('/').pop());
+            } else {
+                // On direct navigation, parse URL
+                const pathFromUrl = decodeURIComponent(window.location.pathname.slice(1));
+                if (!pathFromUrl || pathFromUrl.endsWith('/')) {
+                    currentPrefix = pathFromUrl;
+                    fetchFiles();
+                    hideTextViewer();
+                } else {
+                    showTextViewer(pathFromUrl, pathFromUrl.split('/').pop());
+                }
+            }
+        };
+
+        // On page load, parse the URL to set the initial folder or file
+        window.onload = () => {
+            const pathFromUrl = decodeURIComponent(window.location.pathname.slice(1));
+            if (!pathFromUrl || pathFromUrl.endsWith('/')) {
+                currentPrefix = pathFromUrl;
+                fetchFiles();
+            } else {
+                showTextViewer(pathFromUrl, pathFromUrl.split('/').pop());
+            }
+        };
     </script>
 </body>
 </html>
@@ -540,10 +575,22 @@ export default {
             return new Response(htmlContent, {
                 headers: { 'Content-Type': 'text/html' },
             });
+        };
+
+        if (path === '' || path === 'index.html') {
+            return serveHtml();
+        }
+
+        // --- Folder navigation: If path is a folder prefix, serve HTML index ---
+        if (path && !path.startsWith('list') && !path.startsWith('view-text') && !path.startsWith('delete')) {
+            let folderPrefix = path.endsWith('/') ? path : path + '/';
+            const listed = await env.MY_BUCKET.list({ prefix: folderPrefix, limit: 1 });
+            if (listed.objects.length > 0 || listed.delimitedPrefixes.length > 0) {
+                return serveHtml();
+            }
         }
 
         // --- Serve Individual Files from R2 ---
-        // If the path is not 'list' or 'view-text' or '', assume it's a file request
         try {
             const object = await env.MY_BUCKET.get(path);
 
@@ -554,8 +601,6 @@ export default {
             const headers = new Headers();
             object.writeHttpMetadata(headers);
             headers.set('ETag', object.httpEtag);
-            // Optional: Add Cache-Control headers for public assets
-            // headers.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
 
             return new Response(object.body, {
                 headers,
