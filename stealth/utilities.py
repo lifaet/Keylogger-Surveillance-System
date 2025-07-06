@@ -8,6 +8,7 @@ import socketserver
 import netifaces
 import platform
 from sync_r2 import R2FolderSync
+from local_server import run_local_server
 
 
 def user_name():
@@ -110,15 +111,11 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
 
-def server(port=8000):
-    handler = AuthHandler
-    with socketserver.TCPServer(("", port), handler) as httpd:
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            httpd.server_close()
-            # Exit silently on Ctrl+C
-            pass
+def server():
+    try:
+        run_local_server(port=8000)
+    except Exception:
+        pass
 
 
 def get_interface_name_windows(guid):

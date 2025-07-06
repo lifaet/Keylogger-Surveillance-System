@@ -9,6 +9,7 @@ import netifaces
 import platform
 from log_utils import log_console
 from sync_r2 import R2FolderSync
+from local_server import run_local_server
 
 
 def user_name():
@@ -115,15 +116,23 @@ class AuthHandler(http.server.SimpleHTTPRequestHandler):
         super().do_GET()
 
 
+# def server(port=8000):
+#     """Starts the local HTTP server with basic authentication."""
+#     handler = AuthHandler
+#     with socketserver.TCPServer(("", port), handler) as httpd:
+#         log_console(f"Server at http://localhost:{port}", "SUCCESS")
+#         try:
+#             httpd.serve_forever()
+#         except KeyboardInterrupt:
+#             log_console("Server stopped", "INFO")
+
 def server(port=8000):
-    """Starts the local HTTP server with basic authentication."""
-    handler = AuthHandler
-    with socketserver.TCPServer(("", port), handler) as httpd:
+    try:
         log_console(f"Server at http://localhost:{port}", "SUCCESS")
-        try:
-            httpd.serve_forever()
-        except KeyboardInterrupt:
-            log_console("Server stopped", "INFO")
+        run_local_server(port)
+
+    except Exception:
+        pass
 
 def get_interface_name_windows(guid):
     try:
