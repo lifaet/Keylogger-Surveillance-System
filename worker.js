@@ -25,32 +25,81 @@ export default {
         // --- Serve Login Page ---
         const serveLogin = (error = '') => {
             return new Response(`
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>KSS Login</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="https://lifaet.github.io/assets/images/favicon.ico" type="image/x-icon">
-    <style>
-        body { font-family: monospace; background: #f5f7fa; display: flex; align-items: center; justify-content: center; height: 100vh; }
-        .login-box { background: #fff; padding: 2em 2.5em; border-radius: 10px; box-shadow: 0 2px 16px #0002; display: flex; flex-direction: column; align-items: center; }
-        h2 { color: #1976d2; margin-bottom: 1em; text-align: center; width: 100%; }
-        input { font-family: inherit; font-size: 1em; padding: 0.5em; margin-bottom: 1em; width: 100%; border: 1px solid #e3e8ee; border-radius: 6px; }
-        button { background: #1976d2; color: #fff; border: none; border-radius: 6px; padding: 0.5em 2em; font-size: 1em; font-weight: 600; cursor: pointer; margin: 0 auto; display: block; }
-        .error { color: #d32f2f; margin-bottom: 1em; text-align: center; width: 100%; }
-    </style>
-</head>
-<body>
-    <form class="login-box" method="POST" action="/login">
-        <h2>KSS Login</h2>
-        ${error ? `<div class="error">${error}</div>` : ''}
-        <input type="text" name="username" placeholder="Username" autocomplete="username" required>
-        <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
-        <button type="submit">Login</button>
-    </form>
-</body>
-</html>
+        <!DOCTYPE html>
+        <html lang="en">
+
+        <head>
+            <meta charset="UTF-8">
+            <title>KSS Login</title>
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <link rel="icon" href="https://lifaet.github.io/assets/images/favicon.ico" type="image/x-icon">
+            <style>
+                body {
+                    background-image: url('https://i.pinimg.com/originals/21/7d/a2/217da299cc918fad9b76eb99e4bb75b3.gif') !important;
+                    font-family: monospace;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    height: 100vh;
+                }
+
+                .login-box {
+                    padding: 2em 2.5em;
+                    border-radius: 10px;
+                    box-shadow: 0 2px 16px #0002;
+                    flex-direction: column;
+                    align-items: center;
+                }
+
+                h2 {
+                    color: #1976d2;
+                    margin-bottom: 1em;
+                    text-align: center;
+                    width: 100%;
+                }
+
+                input {
+                    font-family: inherit;
+                    padding: 0.5em;
+                    margin-bottom: 1em;
+                    width: 100%;
+                    border: 1px solid #ffffffdf;
+                    border-radius: 6px;
+                }
+
+                button {
+                    background: #1976d2;
+                    color: #ffffffdf;
+                    border: none;
+                    border-radius: 6px;
+                    padding: 0.5em 2em;
+                    font-size: 1em;
+                    font-weight: 600;
+                    cursor: pointer;
+                    margin: 0 auto;
+                    display: block;
+                }
+
+                .error {
+                    color: #d32f2f;
+                    margin-bottom: 1em;
+                    text-align: center;
+                    width: 100%;
+                }
+            </style>
+        </head>
+
+        <body>
+            <form class="login-box" method="POST" action="/login">
+                <h2>KSS Login</h2>
+                ${error ? `<div class="error">${error}</div>` : ''}
+                <input type="text" name="username" placeholder="Username" autocomplete="username" required>
+                <input type="password" name="password" placeholder="Password" autocomplete="current-password" required>
+                <button type="submit">Login</button>
+            </form>
+        </body>
+
+        </html>
             `, {
                 headers: {
                     'Content-Type': 'text/html',
